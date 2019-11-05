@@ -111,7 +111,7 @@ end
 
 function Geom:findSegment(x,y,type)
 
-	local array = type == "bridges" and self.bridges or self.tiles
+	local array = type == "bridge" and self.bridges or self.tiles
 	local found = {}
 
 	local queue = { {x,y,type} }
