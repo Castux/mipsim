@@ -1,8 +1,9 @@
-.hoverRect
+.selectRect
 {
 	fill: none;
 	stroke-width: 1px;
-	stroke: grey;
+	stroke: darkgrey;
+	stroke-dasharray: 1px;
 }
 
 svg > #background
@@ -12,52 +13,28 @@ svg > #background
 	fill: #ffffe1;
 }
 
-#selector > .sel-button.selected
+.tile.wire
 {
-	border: 4px solid black;
-}
-
-#selector > .sel-button
-{
-	display: inline-block;
-	width: 30px;
-	height: 30px;
-	border: 4px solid #00000000
-}
-
-#selector > .none
-{
-	background-color: #00000000;
-	border: 4px dashed darkgrey;
-}
-
-#selector > .wire, .tile.wire
-{
-	background-color: grey;
 	fill: grey;
 }
 
-#selector > .power, .tile.power
+.tile.power
 {
-	background-color: red;
 	fill: red;
 }
 
-#selector > .ground, .tile.ground
+.tile.ground
 {
-	background-color: blue;
 	fill: blue;
 }
 
-#selector > .transistor, .tile.transistor
+.tile.transistor
 {
-	background-color: purple;
 	fill: purple;
 }
 
-#selector > .bridge, .tile.bridge
+.tile.bridge
 {
-	background-color: lightgrey;
 	fill: #aaaaaa55;
 	border: 4px solid darkgrey;
 	stroke-width: 1px;

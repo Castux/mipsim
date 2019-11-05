@@ -6,20 +6,22 @@ local tileSize = 10
 local svgNS = "http://www.w3.org/2000/svg"
 local Canvas = class()
 
-function Canvas:init(id, selector)
+function Canvas:init(id)
 
 	self.svg = js.global.document:getElementById(id)
 	self.svg.onmousemove = function(target, ev)
 		self:onMouseMove(target, ev)
 	end
+	self.svg.onmousedown = function(target, ev)
+		self:onMouseDown(target, ev)
+	end
+	self.svg.onmouseup = function() self:onMouseUp() end
 
 	self.mainLayer = self.svg:getElementById "mainLayer"
 	self.bridgeLayer = self.svg:getElementById "bridgeLayer"
 
-	self.svg.onclick = function() self:onClick() end
-	self:createHoverRect()
 
-	self.selector = selector
+	self:createSelectRect()
 
 	self.tiles = {}
 	self.bridges = {}
@@ -37,19 +39,20 @@ function Canvas:init(id, selector)
 	self.background = self.svg:getElementById "background"
 end
 
-function Canvas:createHoverRect()
+function Canvas:createSelectRect()
 
 	local rect = js.global.document:createElementNS(svgNS, "rect")
 	rect:setAttribute("width", tileSize)
 	rect:setAttribute("height", tileSize)
-	rect.classList:add("hoverRect")
+	rect.classList:add("selectRect")
+	rect.classList:add("hidden")
 
 	self.svg:appendChild(rect)
-	self.hoverRect = rect
+	self.selectRect = rect
 
 end
 
-function Canvas:onMouseMove(target, ev)
+function Canvas:updateMousePosition(target,ev)
 
 	assert(target == self.svg)
 	local pt = target:createSVGPoint()
@@ -61,26 +64,41 @@ function Canvas:onMouseMove(target, ev)
 
 	self.hoverX = cursor.x // tileSize
 	self.hoverY = cursor.y // tileSize
+end
 
-	self.hoverRect:setAttribute("x", self.hoverX * tileSize)
-	self.hoverRect:setAttribute("y", self.hoverY * tileSize)
+function Canvas:onMouseMove(target, ev)
 
-	if ev.buttons ~= 0 then
-		self:onClick("dragging")
+	self:updateMousePosition(target, ev)
+
+	if self.dragStartX and self.dragStartY then
+
+		local top = math.min(self.dragStartY, self.hoverY)
+		local left = math.min(self.dragStartX, self.hoverX)
+
+		local w = math.abs(self.dragStartX - self.hoverX) + 1
+		local h = math.abs(self.dragStartY - self.hoverY) + 1
+
+		self.selectRect:setAttribute("x", left * tileSize)
+		self.selectRect:setAttribute("y", top * tileSize)
+		self.selectRect:setAttribute("width", w * tileSize)
+		self.selectRect:setAttribute("height", h * tileSize)
+		self.selectRect.classList:remove("hidden")
 	end
 end
 
-function Canvas:onClick(dragging)
+function Canvas:onMouseDown(target, ev)
 
-	local tileType = self.selector:getSelectedType()
+	self:onMouseMove(target, ev)
 
-	if tileType ~= "bridge" then
-		self:setTile(self.hoverX, self.hoverY, tileType)
-	elseif not dragging then
-		self:toggleBridge(self.hoverX, self.hoverY)
-	end
+	self.dragStartX = self.hoverX
+	self.dragStartY = self.hoverY
 
-	self.tileDumpArea.value = self:dumpTiles()
+	self:onMouseMove(target, ev)
+end
+
+function Canvas:onMouseUp()
+	self.dragStartX = nil
+	self.dragStartY = nil
 end
 
 function Canvas:setTile(x,y,type)
