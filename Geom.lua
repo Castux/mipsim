@@ -61,10 +61,14 @@ end
 
 function Geom:iterTiles(bridges)
 
-	local array = bridges and self.bridges or self.tiles
-
 	return coroutine.wrap(function()
-		for i,row in pairs(array) do
+		for i,row in pairs(self.tiles) do
+			for j,w in pairs(row) do
+				coroutine.yield(i,j,w)
+			end
+		end
+
+		for i,row in pairs(self.bridges) do
 			for j,w in pairs(row) do
 				coroutine.yield(i,j,w)
 			end
@@ -80,19 +84,82 @@ function Geom:dumpTiles()
 		table.insert(res, str)
 	end
 
-	for i,j,type in self:iterTiles("bridges") do
-		local str = string.format("{%d,%d,%q}", i, j, type)
-		table.insert(res, str)
+	return "{" .. table.concat(res, ",") .. "}"
+end
+
+local function hash(x,y,type)
+	return string.format("%d:%d%s",
+		x,
+		y,
+		type == "bridge" and "b" or ""
+	)
+end
+
+local function neighbours(x,y)
+
+	return coroutine.wrap(function()
+		for i = x-1,x+1 do
+			for j = y-1,y+1 do
+				if i ~= j then
+					coroutine.yield(i,j)
+				end
+			end
+		end
+	end)
+
+end
+
+function Geom:findSegment(x,y,type)
+
+	local array = type == "bridges" and self.bridges or self.tiles
+	local found = {}
+
+	local queue = { {x,y,type} }
+	local inQueue = {}
+
+	inQueue[hash(x,y,type)] = true
+
+	while #queue > 0 do
+		local current = table.remove(queue)
+		table.insert(found, current)
+
+		for i,j in neighbours(current[1], current[2]) do
+
+			local tile = array[i] and array[i][j]
+			if tile == type and not inQueue[hash(i,j,type)] then
+				table.insert(queue, {i,j,type})
+				inQueue[hash(i,j,type)] = true
+			end
+		end
 	end
 
-	return "{" .. table.concat(res, ",") .. "}"
+	return found
 end
 
 function Geom:findSegments()
 
-	local tileLeft = {}
+	local tilesLeft = {}
 
+	for i,j,type in self:iterTiles() do
+		tilesLeft[hash(i,j,type)] = {i,j,type}
+	end
 
+	local segments = {}
+
+	while true do
+
+		local k,tile = next(tilesLeft)
+		if not tile then break end
+
+		local segment = self:findSegment(tile[1], tile[2], tile[3])
+		for _,v in ipairs(segment) do
+			tilesLeft[hash(v[1],v[2],v[3])] = nil
+		end
+
+		table.insert(segments, segment)
+	end
+
+	return segments
 end
 
 return Geom
