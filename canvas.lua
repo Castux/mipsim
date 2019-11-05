@@ -175,6 +175,26 @@ function Canvas:toggleBridge(x,y)
 	self.bridges[x][y] = rect
 end
 
+function Canvas:fill(type)
+
+	if not self.selection then
+		return
+	end
+
+	local minx,miny,w,h = table.unpack(self.selection)
+
+	for x = minx, minx + w - 1 do
+		for y = miny, miny + h - 1 do
+
+			if type ~= "bridge" then
+				self:setTile(x,y,type)
+			else
+				self:toggleBridge(x,y)
+			end
+		end
+	end
+end
+
 function Canvas:dumpTiles()
 	local res = {}
 	for i,row in pairs(self.tiles) do
@@ -264,10 +284,21 @@ function Canvas:handleKeyPress(key)
 	if key == "Escape" then
 		self:deselect()
 
-	elseif key == "w" and self.selection then
-
+	elseif key == "w" then
+		self:fill("wire")
+	elseif key == "p" then
+		self:fill("power")
+	elseif key == "g" then
+		self:fill("ground")
+	elseif key == "t" then
+		self:fill("transistor")
+	elseif key == "b" then
+		self:fill("bridge")
+	elseif key == "Backspace" then
+		self:fill("none")
 	end
 
+	self.tileDumpArea.value = self:dumpTiles()
 end
 
 return Canvas
