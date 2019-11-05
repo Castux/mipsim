@@ -58,5 +58,5 @@ svg > .background
 #selector > .bridge, .tile.bridge
 {
 	background-color: lightgrey;
-	fill: lightgrey;
+	fill: #aaaaaa55;
 }

@@ -12,12 +12,16 @@ function Canvas:init(id, selector)
 		self:onMouseMove(target, ev)
 	end
 
+	self.mainLayer = self.svg:getElementById "mainLayer"
+	self.bridgeLayer = self.svg:getElementById "bridgeLayer"
+
 	self.svg.onclick = function() self:onClick() end
 	self:createHoverRect()
 
 	self.selector = selector
 
 	self.tiles = {}
+	self.bridges = {}
 end
 
 function Canvas:createHoverRect()
@@ -49,14 +53,19 @@ function Canvas:onMouseMove(target, ev)
 	self.hoverRect:setAttribute("y", self.hoverY * tileSize)
 
 	if ev.buttons ~= 0 then
-		self:onClick()
+		self:onClick("dragging")
 	end
 end
 
-function Canvas:onClick()
+function Canvas:onClick(dragging)
 
 	local tileType = self.selector:getSelectedType()
-	self:setTile(self.hoverX, self.hoverY, tileType)
+
+	if tileType ~= "bridge" then
+		self:setTile(self.hoverX, self.hoverY, tileType)
+	elseif not dragging then
+		self:toggleBridge(self.hoverX, self.hoverY)
+	end
 
 end
 
@@ -70,7 +79,7 @@ function Canvas:setTile(x,y,type)
 
 	if type == "none" then
 		if previous then
-			self.svg:removeChild(previous.elem)
+			self.mainLayer:removeChild(previous.elem)
 			self.tiles[x][y] = nil
 		end
 
@@ -85,7 +94,7 @@ function Canvas:setTile(x,y,type)
 		rect:setAttribute("y", y * tileSize)
 		rect.classList:add("tile")
 		rect.classList:add("dummy")
-		self.svg:appendChild(rect)
+		self.mainLayer:appendChild(rect)
 
 		previous = { elem = rect }
 		self.tiles[x][y] = previous
@@ -96,6 +105,32 @@ function Canvas:setTile(x,y,type)
 
 	elem.classList:remove(elem.classList[1])
 	elem.classList:add(type)
+end
+
+function Canvas:toggleBridge(x,y)
+
+	if not self.bridges[x] then
+		self.bridges[x] = {}
+	end
+
+	local previous = self.bridges[x][y]
+
+	if previous then
+		self.bridgeLayer:removeChild(previous)
+		self.bridges[x][y] = nil
+		return
+	end
+
+	local rect = js.global.document:createElementNS(svgNS, "rect")
+	rect:setAttribute("width", tileSize)
+	rect:setAttribute("height", tileSize)
+	rect:setAttribute("x", x * tileSize)
+	rect:setAttribute("y", y * tileSize)
+	rect.classList:add("tile")
+	rect.classList:add("bridge")
+	self.bridgeLayer:appendChild(rect)
+
+	self.bridges[x][y] = rect
 end
 
 function Canvas:dumpTiles()
