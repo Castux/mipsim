@@ -112,12 +112,20 @@ function Canvas:deselect()
 	self.selectRect.classList:add("hidden")
 end
 
+local function hash(x,y,type)
+	return string.format("%d:%d%s",
+		x,
+		y,
+		type == "bridge" and "b" or ""
+	)
+end
+
 function Canvas:setTile(x,y,type)
 
 	self.geom:setTile(x,y,type)
 
-	local typeHash = type == "bridge" and "b" or ""
-	local elem = self.tileRects[x .. ":" .. y .. typeHash]
+	local h = hash(x,y,type)
+	local elem = self.tileRects[h]
 
 	if not elem then
 		local rect = js.global.document:createElementNS(svgNS, "rect")
@@ -132,7 +140,7 @@ function Canvas:setTile(x,y,type)
 		layer:appendChild(rect)
 
 		elem = rect
-		self.tileRects[x .. ":" .. y .. typeHash] = elem
+		self.tileRects[h] = elem
 	end
 
 	elem.classList:remove(elem.classList[1])
@@ -141,14 +149,15 @@ end
 
 function Canvas:resetTile(x,y,type)
 
+
 	self.geom:resetTile(x,y,type)
 
-	local typeHash = type == "bridge" and "b" or ""
-	local elem = self.tileRects[x .. ":" .. y .. typeHash]
+	local h = hash(x,y,type)
+	local elem = self.tileRects[h]
 
 	if elem then
 		elem:remove()
-		self.tileRects[x .. ":" .. y .. typeHash] = nil
+		self.tileRects[h] = nil
 	end
 end
 
@@ -172,6 +181,8 @@ function Canvas:fill(type)
 			end
 		end
 	end
+
+	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
 function Canvas:clearTiles()
@@ -183,11 +194,13 @@ function Canvas:clearTiles()
 		self.tileRects[k] = nil
 	end
 
+	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
 function Canvas:loadTiles(str)
 
 	self:clearTiles()
+
 	local newTilesLoader = load("return " .. str)
 	if not newTilesLoader then
 		print "Invalid tile dump"
@@ -198,6 +211,8 @@ function Canvas:loadTiles(str)
 	for _,t in ipairs(tiles) do
 		self:setTile(t[1], t[2], t[3])
 	end
+
+	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
 function Canvas:zoom(factor)
@@ -249,7 +264,6 @@ function Canvas:handleKeyPress(key)
 		self:fill("resetBridge")
 	end
 
-	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
 return Canvas
