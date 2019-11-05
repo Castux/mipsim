@@ -141,6 +141,14 @@ function Canvas:dumpTiles()
 			table.insert(res, str)
 		end
 	end
+
+	for i,row in pairs(self.bridges) do
+		for j,w in pairs(row) do
+			local str = string.format("{%d,%d,%q}", i, j, "bridge")
+			table.insert(res, str)
+		end
+	end
+
 	return "{" .. table.concat(res, ",") .. "}"
 end
 
@@ -166,7 +174,11 @@ function Canvas:loadTiles(str)
 
 	local tiles = newTilesLoader()
 	for _,t in ipairs(tiles) do
-		self:setTile(t[1], t[2], t[3])
+		if t[3] == "bridge" then
+			self:toggleBridge(t[1], t[2])
+		else
+			self:setTile(t[1], t[2], t[3])
+		end
 	end
 end
 
