@@ -47,6 +47,10 @@ function Canvas:onMouseMove(target, ev)
 
 	self.hoverRect:setAttribute("x", self.hoverX * tileSize)
 	self.hoverRect:setAttribute("y", self.hoverY * tileSize)
+
+	if ev.buttons ~= 0 then
+		self:onClick()
+	end
 end
 
 function Canvas:onClick()
