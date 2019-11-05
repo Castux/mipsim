@@ -59,24 +59,40 @@ function Geom:clearTiles()
 
 end
 
+function Geom:iterTiles(bridges)
+
+	local array = bridges and self.bridges or self.tiles
+
+	return coroutine.wrap(function()
+		for i,row in pairs(array) do
+			for j,w in pairs(row) do
+				coroutine.yield(i,j,w)
+			end
+		end
+	end)
+end
+
 function Geom:dumpTiles()
 	local res = {}
-	for i,row in pairs(self.tiles) do
-		for j,w in pairs(row) do
-			local str = string.format("{%d,%d,%q}", i, j, w)
-			table.insert(res, str)
-		end
+
+	for i,j,type in self:iterTiles() do
+		local str = string.format("{%d,%d,%q}", i, j, type)
+		table.insert(res, str)
 	end
 
-	for i,row in pairs(self.bridges) do
-		for j,w in pairs(row) do
-			local str = string.format("{%d,%d,%q}", i, j, w)
-			table.insert(res, str)
-		end
+	for i,j,type in self:iterTiles("bridges") do
+		local str = string.format("{%d,%d,%q}", i, j, type)
+		table.insert(res, str)
 	end
 
 	return "{" .. table.concat(res, ",") .. "}"
 end
 
+function Geom:findSegments()
+
+	local tileLeft = {}
+
+
+end
 
 return Geom
