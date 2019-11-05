@@ -30,7 +30,7 @@ function Selector:init(id)
 	self:select(self.elem.children[0])
 
 	js.global.document.onkeydown = function(target, ev)
-		print(target, ev)
+
 		if ev.key == "x" then
 			self:selectNext()
 		elseif ev.key == "z" then
