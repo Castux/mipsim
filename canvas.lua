@@ -20,7 +20,6 @@ function Canvas:init(id)
 	self.mainLayer = self.svg:getElementById "mainLayer"
 	self.bridgeLayer = self.svg:getElementById "bridgeLayer"
 
-
 	self:createSelectRect()
 
 	self.tiles = {}
@@ -36,6 +35,10 @@ function Canvas:init(id)
 		self:zoom(e.deltaY > 0 and scrollSpeed or 1/scrollSpeed)
 	end
 
+	js.global.document.onkeydown = function(target, e)
+		self:handleKeyPress(e.key)
+	end
+
 	self.background = self.svg:getElementById "background"
 end
 
@@ -49,7 +52,6 @@ function Canvas:createSelectRect()
 
 	self.svg:appendChild(rect)
 	self.selectRect = rect
-
 end
 
 function Canvas:updateMousePosition(target,ev)
@@ -83,6 +85,8 @@ function Canvas:onMouseMove(target, ev)
 		self.selectRect:setAttribute("width", w * tileSize)
 		self.selectRect:setAttribute("height", h * tileSize)
 		self.selectRect.classList:remove("hidden")
+
+		self.selection = {left, top, w, h}
 	end
 end
 
@@ -99,6 +103,12 @@ end
 function Canvas:onMouseUp()
 	self.dragStartX = nil
 	self.dragStartY = nil
+end
+
+function Canvas:deselect()
+
+	self.selection = nil
+	self.selectRect.classList:add("hidden")
 end
 
 function Canvas:setTile(x,y,type)
@@ -247,6 +257,17 @@ function Canvas:zoom(factor)
 	self.background:setAttribute("height", newh)
 	self.background:setAttribute("x", newminx)
 	self.background:setAttribute("y", newminy)
+end
+
+function Canvas:handleKeyPress(key)
+
+	if key == "Escape" then
+		self:deselect()
+
+	elseif key == "w" and self.selection then
+
+	end
+
 end
 
 return Canvas
