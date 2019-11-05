@@ -59,4 +59,7 @@ svg > .background
 {
 	background-color: lightgrey;
 	fill: #aaaaaa55;
+	border: 4px solid darkgrey;
+	stroke-width: 1px;
+	stroke: darkgrey;
 }
