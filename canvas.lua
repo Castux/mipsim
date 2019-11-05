@@ -156,8 +156,15 @@ function Canvas:clearTiles()
 
 	for i,row in pairs(self.tiles) do
 		for j,w in pairs(row) do
-			self.svg:removeChild(w.elem)
-			self.tiles[x][y] = nil
+			self.mainLayer:removeChild(w.elem)
+			self.tiles[i][j] = nil
+		end
+	end
+
+	for i,row in pairs(self.bridges) do
+		for j,w in pairs(row) do
+			self.bridgeLayer:removeChild(w)
+			self.bridges[i][j] = nil
 		end
 	end
 
