@@ -6,6 +6,7 @@ local function init()
 
 	local selector = Selector("selector")
 	local canvas = Canvas("canvas", selector)
+
 end
 
 init()

@@ -22,6 +22,11 @@ function Canvas:init(id, selector)
 
 	self.tiles = {}
 	self.bridges = {}
+
+	self.tileDumpArea = js.global.document:getElementById "tileDump"
+	self.tileDumpArea.onchange = function()
+		self:loadTiles(self.tileDumpArea.value)
+	end
 end
 
 function Canvas:createHoverRect()
@@ -67,6 +72,7 @@ function Canvas:onClick(dragging)
 		self:toggleBridge(self.hoverX, self.hoverY)
 	end
 
+	self.tileDumpArea.value = self:dumpTiles()
 end
 
 function Canvas:setTile(x,y,type)
