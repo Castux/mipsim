@@ -1,6 +1,7 @@
 local class = require "class"
 local js = require "js"
 
+local scrollSpeed = 1.03
 local tileSize = 10
 local svgNS = "http://www.w3.org/2000/svg"
 local Canvas = class()
@@ -27,6 +28,13 @@ function Canvas:init(id, selector)
 	self.tileDumpArea.onchange = function()
 		self:loadTiles(self.tileDumpArea.value)
 	end
+
+	self.svg.onwheel = function(target, e)
+		e:preventDefault()
+		self:zoom(e.deltaY > 0 and scrollSpeed or 1/scrollSpeed)
+	end
+
+	self.background = self.svg:getElementById "background"
 end
 
 function Canvas:createHoverRect()
@@ -193,6 +201,34 @@ function Canvas:loadTiles(str)
 			self:setTile(t[1], t[2], t[3])
 		end
 	end
+end
+
+function Canvas:zoom(factor)
+
+	local viewBox = self.svg:getAttribute "viewBox"
+	local minx, miny, w, h = viewBox:match("(%S+) (%S+) (%S+) (%S+)")
+
+	minx = tonumber(minx)
+	miny = tonumber(miny)
+	w = tonumber(w)
+	h = tonumber(h)
+
+	local cx, cy = self.hoverX * tileSize, self.hoverY * tileSize
+
+	local newminx = (minx - cx) * factor + cx
+	local newminy = (miny - cy) * factor + cy
+	local neww = w * factor
+	local newh = h * factor
+
+	local newBox = string.format("%f %f %f %f",
+		newminx, newminy, neww, newh)
+
+	self.svg:setAttribute("viewBox", newBox)
+
+	self.background:setAttribute("width", neww)
+	self.background:setAttribute("height", newh)
+	self.background:setAttribute("x", newminx)
+	self.background:setAttribute("y", newminy)
 end
 
 return Canvas
