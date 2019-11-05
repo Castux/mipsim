@@ -1,5 +1,6 @@
 local class = require "class"
 local js = require "js"
+local Geom = require "Geom"
 
 local scrollSpeed = 1.03
 local tileSize = 10
@@ -22,9 +23,6 @@ function Canvas:init(id)
 
 	self:createSelectRect()
 
-	self.tiles = {}
-	self.bridges = {}
-
 	self.tileDumpArea = js.global.document:getElementById "tileDump"
 	self.tileDumpArea.onchange = function()
 		self:loadTiles(self.tileDumpArea.value)
@@ -40,6 +38,9 @@ function Canvas:init(id)
 	end
 
 	self.background = self.svg:getElementById "background"
+
+	self.geom = Geom()
+	self.tileRects = {}
 end
 
 function Canvas:createSelectRect()
@@ -113,22 +114,12 @@ end
 
 function Canvas:setTile(x,y,type)
 
-	if not self.tiles[x] then
-		self.tiles[x] = {}
-	end
+	self.geom:setTile(x,y,type)
 
-	local previous = self.tiles[x][y]
+	local typeHash = type == "bridge" and "b" or ""
+	local elem = self.tileRects[x .. ":" .. y .. typeHash]
 
-	if type == "none" then
-		if previous then
-			self.mainLayer:removeChild(previous.elem)
-			self.tiles[x][y] = nil
-		end
-
-		return
-	end
-
-	if not previous then
+	if not elem then
 		local rect = js.global.document:createElementNS(svgNS, "rect")
 		rect:setAttribute("width", tileSize)
 		rect:setAttribute("height", tileSize)
@@ -136,43 +127,29 @@ function Canvas:setTile(x,y,type)
 		rect:setAttribute("y", y * tileSize)
 		rect.classList:add("tile")
 		rect.classList:add("dummy")
-		self.mainLayer:appendChild(rect)
 
-		previous = { elem = rect }
-		self.tiles[x][y] = previous
+		local layer = type == "bridge" and self.bridgeLayer or self.mainLayer
+		layer:appendChild(rect)
+
+		elem = rect
+		self.tileRects[x .. ":" .. y .. typeHash] = elem
 	end
-
-	previous.type = type
-	local elem = previous.elem
 
 	elem.classList:remove(elem.classList[1])
 	elem.classList:add(type)
 end
 
-function Canvas:toggleBridge(x,y)
+function Canvas:resetTile(x,y,type)
 
-	if not self.bridges[x] then
-		self.bridges[x] = {}
+	self.geom:resetTile(x,y,type)
+
+	local typeHash = type == "bridge" and "b" or ""
+	local elem = self.tileRects[x .. ":" .. y .. typeHash]
+
+	if elem then
+		elem:remove()
+		self.tileRects[x .. ":" .. y .. typeHash] = nil
 	end
-
-	local previous = self.bridges[x][y]
-
-	if previous then
-		self.bridgeLayer:removeChild(previous)
-		self.bridges[x][y] = nil
-		return
-	end
-
-	local rect = js.global.document:createElementNS(svgNS, "rect")
-	rect:setAttribute("width", tileSize)
-	rect:setAttribute("height", tileSize)
-	rect:setAttribute("x", x * tileSize)
-	rect:setAttribute("y", y * tileSize)
-	rect.classList:add("tile")
-	rect.classList:add("bridge")
-	self.bridgeLayer:appendChild(rect)
-
-	self.bridges[x][y] = rect
 end
 
 function Canvas:fill(type)
@@ -186,48 +163,24 @@ function Canvas:fill(type)
 	for x = minx, minx + w - 1 do
 		for y = miny, miny + h - 1 do
 
-			if type ~= "bridge" then
-				self:setTile(x,y,type)
+			if type == "reset" then
+				self:resetTile(x,y)
+			elseif type == "resetBridge" then
+				self:resetTile(x,y,"bridge")
 			else
-				self:toggleBridge(x,y)
+				self:setTile(x,y,type)
 			end
 		end
 	end
 end
 
-function Canvas:dumpTiles()
-	local res = {}
-	for i,row in pairs(self.tiles) do
-		for j,w in pairs(row) do
-			local str = string.format("{%d,%d,%q}", i, j, w.type)
-			table.insert(res, str)
-		end
-	end
-
-	for i,row in pairs(self.bridges) do
-		for j,w in pairs(row) do
-			local str = string.format("{%d,%d,%q}", i, j, "bridge")
-			table.insert(res, str)
-		end
-	end
-
-	return "{" .. table.concat(res, ",") .. "}"
-end
-
 function Canvas:clearTiles()
 
-	for i,row in pairs(self.tiles) do
-		for j,w in pairs(row) do
-			self.mainLayer:removeChild(w.elem)
-			self.tiles[i][j] = nil
-		end
-	end
+	self.geom:clearTiles()
 
-	for i,row in pairs(self.bridges) do
-		for j,w in pairs(row) do
-			self.bridgeLayer:removeChild(w)
-			self.bridges[i][j] = nil
-		end
+	for k,v in pairs(self.tileRects) do
+		v:remove()
+		self.tileRects[k] = nil
 	end
 
 end
@@ -243,11 +196,7 @@ function Canvas:loadTiles(str)
 
 	local tiles = newTilesLoader()
 	for _,t in ipairs(tiles) do
-		if t[3] == "bridge" then
-			self:toggleBridge(t[1], t[2])
-		else
-			self:setTile(t[1], t[2], t[3])
-		end
+		self:setTile(t[1], t[2], t[3])
 	end
 end
 
@@ -295,10 +244,12 @@ function Canvas:handleKeyPress(key)
 	elseif key == "b" then
 		self:fill("bridge")
 	elseif key == "Backspace" then
-		self:fill("none")
+		self:fill("reset")
+	elseif key == "B" then
+		self:fill("resetBridge")
 	end
 
-	self.tileDumpArea.value = self:dumpTiles()
+	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
 return Canvas
