@@ -1,3 +1,31 @@
+
+local function modIndex(t,n)
+
+	local i = (n - 1) % #t + 1
+	return t[i]
+end
+
+local function aligned(p1,p2,p3)
+
+	return (p1[1] == p2[1] and p1[1] == p3[1]) or
+		(p1[2] == p2[2] and p1[2] == p3[2])
+end
+
+local function reduceCycle(c)
+
+	local i = 1
+	while i <= #c and #c >= 4 do
+
+		local p1,p2,p3 = modIndex(c, i-1), modIndex(c, i), modIndex(c, i+1)
+
+		if aligned(p1,p2,p3) then
+			table.remove(c, i)
+		else
+			i = i + 1
+		end
+	end
+end
+
 local function polygonize(tiles)
 
 	local allPairs = {}
@@ -57,11 +85,16 @@ local function polygonize(tiles)
 			current = next
 		end
 
-		return result
+		if #result > 1 then		-- internal points are still in allPoints
+			return result
+		else
+			return nil
+		end
 	end
 
 	local cycles = {}
 	for c in findCycle do
+		reduceCycle(c)
 		table.insert(cycles, c)
 	end
 
