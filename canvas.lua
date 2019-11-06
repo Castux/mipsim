@@ -149,7 +149,6 @@ end
 
 function Canvas:resetTile(x,y,type)
 
-
 	self.geom:resetTile(x,y,type)
 
 	local h = hash(x,y,type)
@@ -199,19 +198,7 @@ end
 
 function Canvas:loadTiles(str)
 
-	self:clearTiles()
-
-	local newTilesLoader = load("return " .. str)
-	if not newTilesLoader then
-		print "Invalid tile dump"
-		return
-	end
-
-	local tiles = newTilesLoader()
-	for _,t in ipairs(tiles) do
-		self:setTile(t[1], t[2], t[3])
-	end
-
+	self.geom:loadTiles(str)
 	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 

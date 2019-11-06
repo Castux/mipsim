@@ -7,7 +7,6 @@ function Geom:init()
 	-- flat [x][y] arrays of tile types
 
 	self.tiles = {}
-	self.bridges = {}
 
 	-- segments are adjacent tiles of the same type
 	-- nodes are connected groups of wires and bridges
@@ -25,52 +24,57 @@ end
 
 function Geom:setTile(x,y,type)
 
-	local array = type == "bridge" and self.bridges or self.tiles
+	local tile = self:getTile(x,y)
+	if not tile then
+		tile = {
+			x = x,
+			y = y
+		}
 
-	if not array[x] then
-		array[x] = {}
+		if not self.tiles[x] then
+			self.tiles[x] = {}
+		end
+
+		self.tiles[x][y] = tile
 	end
 
-	array[x][y] = type
+	if type == "bridge" then
+		tile.bridge = true
+	else
+		tile.type = type
+	end
 end
 
 function Geom:getTile(x,y)
-
-	return self.tiles[x] and self.tiles[x][y],
-		self.briges[x] and self.bridges[x][y]
-
+	return self.tiles[x] and self.tiles[x][y]
 end
 
 function Geom:resetTile(x,y,type)
 
-	local array = type == "bridge" and self.bridges or self.tiles
+	local tile = self:getTile(x,y)
+	if not tile then return end
 
-	if not array[x] then
-		return
+	if type == "bridge" then
+		tile.bridge = nil
+	else
+		tile.type = nil
 	end
 
-	array[x][y] = nil
+	if not tile.type and not tile.bridge then
+		self.tiles[x][y] = nil
+	end
 end
 
 function Geom:clearTiles()
-
 	self.tiles = {}
-	self.bridges = {}
-
 end
 
 function Geom:iterTiles(bridges)
 
 	return coroutine.wrap(function()
 		for i,row in pairs(self.tiles) do
-			for j,w in pairs(row) do
-				coroutine.yield(i,j,w)
-			end
-		end
-
-		for i,row in pairs(self.bridges) do
-			for j,w in pairs(row) do
-				coroutine.yield(i,j,w)
+			for j,tile in pairs(row) do
+				coroutine.yield(i,j,tile)
 			end
 		end
 	end)
@@ -79,20 +83,42 @@ end
 function Geom:dumpTiles()
 	local res = {}
 
-	for i,j,type in self:iterTiles() do
-		local str = string.format("{%d,%d,%q}", i, j, type)
-		table.insert(res, str)
+	for x,y,tile in self:iterTiles() do
+		local parts = {}
+		table.insert(parts, string.format("x=%d,y=%d", x, y))
+
+		if tile.type then
+			table.insert(parts, string.format("type=%q", tile.type))
+		end
+
+		if tile.bridge then
+			table.insert(parts, "bridge=true")
+		end
+
+		table.insert(res, "{" .. table.concat(parts, ",") .. "}")
 	end
 
 	return "{" .. table.concat(res, ",") .. "}"
 end
 
-local function hash(x,y,type)
-	return string.format("%d:%d%s",
-		x,
-		y,
-		type == "bridge" and "b" or ""
-	)
+function Geom:loadTiles(str)
+
+	local loader = load("return " .. str)
+	if not loader then
+		print "Invalid tile dump"
+	end
+
+	self:clearTiles()
+	local newTiles = loader()
+
+	for _,t in ipairs(newTiles) do
+		if t.type then
+			self:setTile(t.x, t.y, t.type)
+		end
+		if t.bridge then
+			self:setTile(t.x, t.y, "bridge")
+		end
+	end
 end
 
 local function neighbours(x,y)
@@ -107,59 +133,6 @@ local function neighbours(x,y)
 		end
 	end)
 
-end
-
-function Geom:findSegment(x,y,type)
-
-	local array = type == "bridge" and self.bridges or self.tiles
-	local found = {}
-
-	local queue = { {x,y,type} }
-	local inQueue = {}
-
-	inQueue[hash(x,y,type)] = true
-
-	while #queue > 0 do
-		local current = table.remove(queue)
-		table.insert(found, current)
-
-		for i,j in neighbours(current[1], current[2]) do
-
-			local tile = array[i] and array[i][j]
-			if tile == type and not inQueue[hash(i,j,type)] then
-				table.insert(queue, {i,j,type})
-				inQueue[hash(i,j,type)] = true
-			end
-		end
-	end
-
-	return found
-end
-
-function Geom:findSegments()
-
-	local tilesLeft = {}
-
-	for i,j,type in self:iterTiles() do
-		tilesLeft[hash(i,j,type)] = {i,j,type}
-	end
-
-	local segments = {}
-
-	while true do
-
-		local k,tile = next(tilesLeft)
-		if not tile then break end
-
-		local segment = self:findSegment(tile[1], tile[2], tile[3])
-		for _,v in ipairs(segment) do
-			tilesLeft[hash(v[1],v[2],v[3])] = nil
-		end
-
-		table.insert(segments, segment)
-	end
-
-	return segments
 end
 
 return Geom
