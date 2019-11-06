@@ -121,13 +121,20 @@ function Geom:loadTiles(str)
 	self:updateComponents()
 end
 
-local function neighbours(x,y)
+function Geom:neighbours(tile)
+	local x,y = tile.x, tile.y
 
 	return coroutine.wrap(function()
-		coroutine.yield(x, y-1)
-		coroutine.yield(x, y+1)
-		coroutine.yield(x-1, y)
-		coroutine.yield(x+1, y)
+
+		local neigh = self:getTile(x, y-1)
+		if neigh then coroutine.yield(neigh) end
+		local neigh = self:getTile(x, y+1)
+		if neigh then coroutine.yield(neigh) end
+		local neigh = self:getTile(x-1, y)
+		if neigh then coroutine.yield(neigh) end
+		local neigh = self:getTile(x+1, y)
+		if neigh then coroutine.yield(neigh) end
+
 	end)
 
 end
@@ -161,22 +168,19 @@ function Geom:computeComponent(tile, bridge)
 		comp[current] = true
 		local neighbourCount = 0
 
-		for i,j in neighbours(current.x, current.y) do
-			local neigh = self:getTile(i,j)
-			if neigh then
-				local valid
-			 	if bridge then
-					valid = neigh.bridge
-				else
-					valid = neigh.type == tile.type
-				end
+		for neigh in self:neighbours(current) do
+			local valid
+		 	if bridge then
+				valid = neigh.bridge
+			else
+				valid = neigh.type == tile.type
+			end
 
-				if valid then
-					neighbourCount = neighbourCount + 1
-					table.insert(queue, neigh)
-				elseif neigh.type then
-					adjacentTiles[neigh] = true
-				end
+			if valid then
+				neighbourCount = neighbourCount + 1
+				table.insert(queue, neigh)
+			elseif neigh.type then
+				adjacentTiles[neigh] = true
 			end
 		end
 
