@@ -126,8 +126,6 @@ end
 
 function Canvas:onTileUpdated(tile, deleted)
 
-	print("Tile update", tile.x, tile.y, deleted)
-
 	if deleted then
 		self:onTileDeleted(tile)
 		return
@@ -151,7 +149,13 @@ function Canvas:onTileUpdated(tile, deleted)
 	-- Update type
 
 	svg.classList:remove(svg.classList[1])
-	svg.classList:add(tile.type)
+	svg.classList:add(tile.type or "none")
+
+	if tile.bridge then
+		svg.classList:add "bridge"
+	else
+		svg.classList:remove "bridge"
+	end
 
 end
 
