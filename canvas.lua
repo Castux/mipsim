@@ -270,7 +270,7 @@ end
 function Canvas:createComponent(comp)
 
 	-- One dot anywhere for debug purposes
-	local tile = next(comp)
+	local tile = comp[1]
 
 	local svg = js.global.document:createElementNS(svgNS, "circle")
 	svg:setAttribute("r", tileSize / 4)

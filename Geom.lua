@@ -143,9 +143,17 @@ local function neighbours(x,y)
 
 end
 
-function Geom:computeComponent(tile)
+function Geom:computeComponent(tile, bridge)
 
 	if not tile then
+		return
+	end
+
+	if bridge and not tile.bridge then
+		return
+	end
+
+	if not bridge and not tile.type then
 		return
 	end
 
@@ -163,12 +171,30 @@ function Geom:computeComponent(tile)
 
 		for i,j in neighbours(current.x, current.y) do
 			local neigh = self:getTile(i,j)
-			if neigh and neigh.type == tile.type then
-				table.insert(queue, neigh)
+			if neigh then
+				local valid = bridge and
+					(neigh.bridge) or
+					(neigh.type == tile.type)
+
+				if valid then
+					table.insert(queue, neigh)
+				end
 			end
 		end
 
 		::skip::
+	end
+
+	-- Return as list
+
+	local tmp = {}
+	for k in pairs(comp) do
+		table.insert(tmp, k)
+	end
+	comp = tmp
+
+	if bridge then
+		comp.bridge = true
 	end
 
 	return comp
@@ -179,13 +205,29 @@ function Geom:updateComponents()
 	self.components = {}
 	local done = {}
 
-	for x,y,tile in self:iterTiles() do
-		if not done[tile] then
-			local comp = self:computeComponent(tile)
+	-- Normal components first
 
-			for tile in pairs(comp) do
+	for x,y,tile in self:iterTiles() do
+		if not done[tile] and tile.type then
+			local comp = self:computeComponent(tile)
+			for _,tile in ipairs(comp) do
 				done[tile] = true
 				tile.component = comp
+			end
+			table.insert(self.components, comp)
+		end
+	end
+
+	-- Bridge components next
+
+	done = {}
+
+	for x,y,tile in self:iterTiles() do
+		if not done[tile] and tile.bridge then
+			local comp = self:computeComponent(tile, true)
+			for _,tile in ipairs(comp) do
+				done[tile] = true
+				tile.bridgeComponent = comp
 			end
 			table.insert(self.components, comp)
 		end
