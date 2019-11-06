@@ -43,6 +43,8 @@ function Geom:setTile(x,y,type)
 	else
 		tile.type = type
 	end
+
+	self:setDirtyTile(tile, true)
 end
 
 function Geom:getTile(x,y)
@@ -66,10 +68,40 @@ function Geom:resetTile(x,y,type)
 		self.tiles[x][y] = nil
 		deleted = true
 	end
+
+	self:setDirtyTile(tile, true)
 end
 
 function Geom:clearTiles()
+
 	self.tiles = {}
+	
+	for comp in pairs(self.components) do
+		if self.componentDestroyedCB then
+			self.componentDestroyedCB(comp)
+		end
+	end
+
+	self.components = {}
+end
+
+function Geom:setDirtyTile(tile, addNeighbours)
+
+	self.dirtyTiles[tile] = true
+
+	if tile.component then
+		self:deleteComponent(tile.component)
+	end
+	if tile.bridgeComponent then
+		self:deleteComponent(tile.bridgeComponent)
+	end
+
+	if addNeighbours then
+		for neigh in self:neighbours(tile) do
+			self:setDirtyTile(neigh, false)
+		end
+	end
+
 end
 
 function Geom:iterTiles(bridges)
@@ -327,26 +359,22 @@ function Geom:deleteComponent(comp)
 		self.dirtyComponents[conn] = true
 	end
 
-	if self.componentDestroyedCB then
+	if self.componentDestroyedCB and not comp.destroyed then
 		 self.componentDestroyedCB(comp)
+		 comp.destroyed = true
 	end
-	self.components[comp] = nil
 
+	self.components[comp] = nil
 end
 
 function Geom:updateComponents()
 
-	-- Erase previous ones
-
-	for comp in pairs(self.components) do
-		self:deleteComponent(comp)
-	end
-
 	local done = {}
+	local newComponents = {}
 
 	-- Normal components first
 
-	for x,y,tile in self:iterTiles() do
+	for tile in pairs(self.dirtyTiles) do
 		if not done[tile] and tile.type then
 			local comp = self:computeComponent(tile)
 			for _,tile in ipairs(comp) do
@@ -355,6 +383,7 @@ function Geom:updateComponents()
 			end
 			self.components[comp] = true
 			self.dirtyComponents[comp] = true
+			newComponents[comp] = true
 		end
 	end
 
@@ -362,7 +391,7 @@ function Geom:updateComponents()
 
 	done = {}
 
-	for x,y,tile in self:iterTiles() do
+	for tile in pairs(self.dirtyTiles) do
 		if not done[tile] and tile.bridge then
 			local comp = self:computeComponent(tile, true)
 			for _,tile in ipairs(comp) do
@@ -371,8 +400,11 @@ function Geom:updateComponents()
 			end
 			self.components[comp] = true
 			self.dirtyComponents[comp] = true
+			newComponents[comp] = true
 		end
 	end
+
+	self.dirtyTiles = {}
 
 	-- All tiles should have components!
 
@@ -384,21 +416,23 @@ function Geom:updateComponents()
 
 	-- Update connections
 
-	for comp in pairs(self.components) do
+	for comp in pairs(self.dirtyComponents) do
 		self:updateConnections(comp)
 	end
 
 	-- Extra pass for transistors
 
-	for comp in pairs(self.components) do
+	for comp in pairs(self.dirtyComponents) do
 		if comp.type == "transistor" then
 			self:checkTransistor(comp)
 		end
 	end
 
+	self.dirtyComponents = {}
+
 	-- Cleanup
 
-	for comp in pairs(self.components) do
+	for comp in pairs(newComponents) do
 		if self.componentCreatedCB then
 			self.componentCreatedCB(comp)
 		end
