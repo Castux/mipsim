@@ -240,8 +240,27 @@ function Canvas:createComponent(comp)
 	svg.classList:add("component")
 	svg.classList:add(comp.type)
 
-	if comp.invalid then
-		svg.classList:add "invalid"
+	-- Transistor specials
+
+	if comp.type == "transistor" then
+
+		if comp.invalid then
+			svg.classList:add "invalid"
+		else
+
+			local group = js.global.document:createElementNS(svgNS, "g")
+			group:appendChild(svg)
+
+			local ds = js.global.document:createElementNS(svgNS, "line")
+			ds:setAttribute("x1", (comp.sd1Tile.x + 0.5) * tileSize)
+			ds:setAttribute("y1", (comp.sd1Tile.y + 0.5) * tileSize)
+			ds:setAttribute("x2", (comp.sd2Tile.x + 0.5) * tileSize)
+			ds:setAttribute("y2", (comp.sd2Tile.y + 0.5) * tileSize)
+			ds.classList:add "drain-source"
+
+			group:appendChild(ds)
+			svg = group
+		end
 	end
 
 	-- Bridge endpoints

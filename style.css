@@ -50,6 +50,12 @@ svg > #background
 	stroke-dasharray: 2px;
 }
 
+.drain-source
+{
+	stroke: #d0a1d0;
+	stroke-width: 2px;
+}
+
 .component.bridge, .endpoint
 {
 	stroke-width: 1px;
