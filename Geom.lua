@@ -225,8 +225,6 @@ function Geom:updateConnections(comp)
 			connected[tile.component] = true
 		end
 
-		comp.adjacentTiles = nil
-
 	-- Bridge components
 
 	else
@@ -254,21 +252,57 @@ function Geom:updateConnections(comp)
 	end
 
 	comp.connected = tmp
-
-	-- Extra checks for transistors
-
-	if comp.type == "transistor" then
-		self:checkTransistor(comp)
-	end
 end
 
-function Geom:checkTransistor(comp)
+local function findStraightLine(t)
+
+	for adj in pairs(t.adjacentTiles) do
+		for adj2 in pairs(t.adjacentTiles) do
+
+			if adj.component ~= adj2.component and
+				(adj.x == adj2.x or adj.y == adj2.y) then
+
+				return adj, adj2
+			end
+		end
+	end
+
+	return nil
+end
+
+local function checkTransistor(comp)
 
 	if #comp.connected ~= 3 then
 		comp.invalid = true
 		return
 	end
 
+	local adj, adj2 = findStraightLine(comp)
+	if not adj then
+		comp.invalid = true
+		return
+	end
+
+	-- Source/drains
+
+	comp.sd1 = adj.component
+	comp.sd2 = adj2.component
+
+	-- Gate
+
+	for i,c in ipairs(comp.connected) do
+		if c ~= comp.sd1 and c ~= comp.sd2 then
+			comp.gate = c
+			break
+		end
+	end
+
+	assert(comp.gate)
+
+	-- Remember adjacent tiles for drawing
+
+	comp.sd1Tile = adj
+	comp.sd2Tile = adj2
 end
 
 function Geom:updateComponents()
@@ -308,6 +342,20 @@ function Geom:updateComponents()
 
 	for _,comp in ipairs(self.components) do
 		self:updateConnections(comp)
+	end
+
+	-- Extra pass for transistors
+
+	for _,comp in ipairs(self.components) do
+		if comp.type == "transistor" then
+			checkTransistor(comp)
+		end
+	end
+
+	-- Cleanup
+
+	for _,comp in ipairs(self.components) do
+		comp.adjacentTiles = nil
 	end
 
 	if self.componentsUpdatedCB then
