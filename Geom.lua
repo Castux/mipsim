@@ -134,7 +134,7 @@ local function neighbours(x,y)
 	return coroutine.wrap(function()
 		for i = x-1,x+1 do
 			for j = y-1,y+1 do
-				if i ~= j then
+				if not (i == x and j == y) then
 					coroutine.yield(i,j)
 				end
 			end
