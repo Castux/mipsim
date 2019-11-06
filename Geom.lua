@@ -158,6 +158,7 @@ function Geom:computeComponent(tile, bridge)
 	end
 
 	local comp = {}
+	local endpoints = {}
 	local queue = { tile }
 
 	while #queue > 0 do
@@ -168,6 +169,7 @@ function Geom:computeComponent(tile, bridge)
 		end
 
 		comp[current] = true
+		local neighbourCount = 0
 
 		for i,j in neighbours(current.x, current.y) do
 			local neigh = self:getTile(i,j)
@@ -180,9 +182,14 @@ function Geom:computeComponent(tile, bridge)
 				end
 
 				if valid then
+					neighbourCount = neighbourCount + 1
 					table.insert(queue, neigh)
 				end
 			end
+		end
+
+		if neighbourCount == 1 then
+			table.insert(endpoints, current)
 		end
 
 		::skip::
@@ -197,6 +204,10 @@ function Geom:computeComponent(tile, bridge)
 	comp = tmp
 
 	comp.type = bridge and "bridge" or tile.type
+	if bridge then
+		comp.endpoints = endpoints
+	end
+
 	return comp
 end
 

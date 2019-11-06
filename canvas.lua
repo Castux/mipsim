@@ -240,6 +240,28 @@ function Canvas:createComponent(comp)
 	svg.classList:add("component")
 	svg.classList:add(comp.type)
 
+	-- Bridge endpoints
+
+	if comp.type == "bridge" then
+
+		local group = js.global.document:createElementNS(svgNS, "g")
+		group:appendChild(svg)
+
+		for _,tile in ipairs(comp.endpoints) do
+			local ep = js.global.document:createElementNS(svgNS, "circle")
+			ep:setAttribute("r", tileSize / 4)
+			ep:setAttribute("cx", (tile.x + 0.5) * tileSize)
+			ep:setAttribute("cy", (tile.y + 0.5) * tileSize)
+			ep.classList:add("endpoint")
+
+			group:appendChild(ep)
+		end
+
+		svg = group
+	end
+
+	-- Add to canvas!
+
 	self.componentsLayer:appendChild(svg)
 	self.svgComponents[comp] = svg
 end

@@ -43,7 +43,7 @@ svg > #background
 	fill: purple;
 }
 
-.component.bridge
+.component.bridge, .endpoint
 {
 	stroke-width: 1px;
 	stroke: orange;
