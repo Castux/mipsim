@@ -19,8 +19,7 @@ function Canvas:init(id)
 	end
 	self.svg.onmouseup = function() self:onMouseUp() end
 
-	self.mainLayer = self.svg:getElementById "mainLayer"
-	self.bridgeLayer = self.svg:getElementById "bridgeLayer"
+	self.background = self.svg:getElementById "background"
 	self.componentsLayer = self.svg:getElementById "componentsLayer"
 
 	self:createSelectRect()
@@ -39,15 +38,8 @@ function Canvas:init(id)
 		self:handleKeyPress(e.key)
 	end
 
-	self.background = self.svg:getElementById "background"
-
 	self.geom = Geom()
-	self.svgTiles = {}
 	self.svgComponents = {}
-
-	self.geom.tileUpdatedCB = function(tile, deleted)
-		self:onTileUpdated(tile, deleted)
-	end
 
 	self.geom.componentsUpdatedCB = function(comps)
 		self:onComponentsUpdated(comps)
@@ -129,50 +121,6 @@ end
 
 function Canvas:resetTile(x,y,type)
 	self.geom:resetTile(x,y,type)
-end
-
-function Canvas:onTileUpdated(tile, deleted)
-
-	if deleted then
-		self:onTileDeleted(tile)
-		return
-	end
-
-	local svg = self.svgTiles[tile]
-
-	if not svg then		-- new tile!
-		svg = js.global.document:createElementNS(svgNS, "rect")
-		svg:setAttribute("width", tileSize)
-		svg:setAttribute("height", tileSize)
-		svg:setAttribute("x", tile.x * tileSize)
-		svg:setAttribute("y", tile.y * tileSize)
-		svg.classList:add("tile")
-		svg.classList:add("dummy")
-
-		self.mainLayer:appendChild(svg)
-		self.svgTiles[tile] = svg
-	end
-
-	-- Update type
-
-	svg.classList:remove(svg.classList[1])
-	svg.classList:add(tile.type or "none")
-
-	if tile.bridge then
-		svg.classList:add "bridge"
-	else
-		svg.classList:remove "bridge"
-	end
-
-end
-
-function Canvas:onTileDeleted(tile)
-
-	local svg = self.svgTiles[tile]
-	if svg then
-		svg:remove()
-		self.svgTiles[tile] = nil
-	end
 end
 
 function Canvas:fill(type)
@@ -290,6 +238,7 @@ function Canvas:createComponent(comp)
 	local svg = js.global.document:createElementNS(svgNS, "path")
 	svg:setAttribute("d", str)
 	svg.classList:add("component")
+	svg.classList:add(comp.type)
 
 	self.componentsLayer:appendChild(svg)
 	self.svgComponents[comp] = svg

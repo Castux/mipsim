@@ -193,10 +193,7 @@ function Geom:computeComponent(tile, bridge)
 	end
 	comp = tmp
 
-	if bridge then
-		comp.bridge = true
-	end
-
+	comp.type = bridge and "bridge" or tile.type
 	return comp
 end
 
