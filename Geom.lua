@@ -154,7 +154,6 @@ function Geom:computeComponent(tile, bridge)
 	end
 
 	local comp = {}
-	local endpoints = {}
 	local queue = { tile }
 
 	while #queue > 0 do
@@ -176,13 +175,8 @@ function Geom:computeComponent(tile, bridge)
 			end
 
 			if valid then
-				neighbourCount = neighbourCount + 1
 				table.insert(queue, neigh)
 			end
-		end
-
-		if neighbourCount == 1 then
-			table.insert(endpoints, current)
 		end
 
 		::skip::
@@ -197,14 +191,13 @@ function Geom:computeComponent(tile, bridge)
 	comp = tmp
 
 	comp.type = bridge and "bridge" or tile.type
-	if bridge then
-		comp.endpoints = endpoints
-	end
 
 	return comp
 end
 
 function Geom:adjacentTiles(comp)
+
+	assert(comp.type ~= "bridge")
 
 	return coroutine.wrap(function()
 		for _,tile in ipairs(comp) do
@@ -215,7 +208,29 @@ function Geom:adjacentTiles(comp)
 			end
 		end
 	end)
+end
 
+function Geom:endpoints(comp)
+
+	assert(comp.type == "bridge")
+	local result = {}
+
+	for _,tile in ipairs(comp) do
+		if tile.type == "wire" then
+			local count = 0
+			for neigh in self:neighbours(tile) do
+				if neigh.bridgeComponent == comp then
+					count = count + 1
+				end
+			end
+
+			if count == 1 then
+				table.insert(result, tile)
+			end
+		end
+	end
+
+	return result
 end
 
 function Geom:updateConnections(comp)
@@ -233,30 +248,14 @@ function Geom:updateConnections(comp)
 	-- Bridge components
 
 	else
+		comp.endpoints = self:endpoints(comp)
+		print(comp.endpoints, #comp.endpoints)
 
-		local i = 1
-		while i <= #comp.endpoints do
-			local tile = comp.endpoints[i]
-
-			if tile.type == "wire" then
-				comp.connected[tile.component] = true
-				table.insert(tile.component.connected, comp)	-- connect back the wire
-				i = i + 1
-			else
-				table.remove(comp.endpoints, i)
-			end
+		for _,tile in ipairs(comp.endpoints) do
+			comp.connected[tile.component] = true
+			tile.component.connected[comp] = true
 		end
-
 	end
-
-	-- Flatten list
-
-	local tmp = {}
-	for other,_ in pairs(comp.connected) do
-		table.insert(tmp, other)
-	end
-
-	comp.connected = tmp
 end
 
 function Geom:findStraightLine(t)
@@ -277,7 +276,11 @@ end
 
 function Geom:checkTransistor(comp)
 
-	if #comp.connected ~= 3 then
+	local count = 0
+	for c in pairs(comp.connected) do
+		count = count + 1
+	end
+	if count ~= 3 then
 		comp.invalid = true
 		return
 	end
@@ -295,7 +298,7 @@ function Geom:checkTransistor(comp)
 
 	-- Gate
 
-	for i,c in ipairs(comp.connected) do
+	for c in pairs(comp.connected) do
 		if c ~= comp.sd1 and c ~= comp.sd2 then
 			comp.gate = c
 			break
@@ -376,8 +379,6 @@ function Geom:updateComponents()
 	-- Cleanup
 
 	for _,comp in ipairs(self.components) do
-		comp.adjacentTiles = nil
-
 		if self.componentCreatedCB then
 			self.componentCreatedCB(comp)
 		end

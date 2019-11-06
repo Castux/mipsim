@@ -309,13 +309,13 @@ function Canvas:onComponentCreated(comp)
 	-- Fun stuff
 
 	svg.onmouseenter = function(target)
-		for _,adj in ipairs(comp.connected) do
+		for adj in pairs(comp.connected) do
 			self.svgComponents[adj].classList:add "connected"
 		end
 	end
 
 	svg.onmouseout = function(target)
-		for _,adj in ipairs(comp.connected) do
+		for adj in pairs(comp.connected) do
 			self.svgComponents[adj].classList:remove "connected"
 		end
 	end
