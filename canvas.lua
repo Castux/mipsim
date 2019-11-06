@@ -264,6 +264,20 @@ function Canvas:createComponent(comp)
 
 	self.componentsLayer:appendChild(svg)
 	self.svgComponents[comp] = svg
+
+	-- Fun stuff
+
+	svg.onmouseenter = function(target)
+		for adj,_ in pairs(comp.connected) do
+			self.svgComponents[adj].classList:add "connected"
+		end
+	end
+
+	svg.onmouseout = function(target)
+		for adj,_ in pairs(comp.connected) do
+			self.svgComponents[adj].classList:remove "connected"
+		end
+	end
 end
 
 return Canvas

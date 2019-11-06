@@ -182,7 +182,7 @@ function Geom:computeComponent(tile, bridge)
 				if valid then
 					neighbourCount = neighbourCount + 1
 					table.insert(queue, neigh)
-				elseif not bridge then
+				elseif neigh.type then
 					adjacentTiles[neigh] = true
 				end
 			end
@@ -219,29 +219,34 @@ function Geom:updateConnections(comp)
 
 	-- Regular components
 
-	if comp.adjacentTiles then
-		for i,tile in ipairs(comp.adjacentTiles) do
+	if comp.type ~= "bridge" then
+
+		for tile,_ in pairs(comp.adjacentTiles) do
 			connected[tile.component] = true
 		end
 
 		comp.adjacentTiles = nil
-	end
 
 	-- Bridge components
 
-	if comp.endpoints then
+	else
+
 		local i = 1
 		while i <= #comp.endpoints do
 			local tile = comp.endpoints[i]
 
 			if tile.type == "wire" then
 				connected[tile.component] = true
+				tile.component.connected[comp] = true	-- connect back the wire
 				i = i + 1
 			else
 				table.remove(comp.endpoints, i)
 			end
 		end
+
 	end
+
+	comp.connected = connected
 end
 
 function Geom:updateComponents()

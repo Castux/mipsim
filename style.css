@@ -54,5 +54,14 @@ svg > #background
 
 .component:hover
 {
-	fill-opacity: 50%;
+	stroke: lightgreen;
+	stroke-width: 2px;
+	stroke-dasharray: 0px;
+}
+
+.component.connected, .connected > .component
+{
+	stroke: lightgreen;
+	stroke-width: 2px;
+	stroke-dasharray: 2px;
 }
