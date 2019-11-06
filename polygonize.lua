@@ -35,8 +35,8 @@ local function polygonize(tiles)
 
 	local function addPair(p1, p2)
 
-		local hash1 = table.concat(p1, ":")
-		local hash2 = table.concat(p2, ":")
+		local hash1 = string.format("%d:%d", p1[1], p1[2])
+		local hash2 = string.format("%d:%d", p2[1], p2[2])
 
 		allPoints[hash1] = p1
 		allPoints[hash2] = p2
@@ -58,7 +58,24 @@ local function polygonize(tiles)
 		addPair( {tile.x, tile.y + 1}, {tile.x + 1, tile.y + 1})
 	end
 
-	-- Go around
+	-- Remove internal points
+
+	for h, point in pairs(allPoints) do
+		local border = false
+		for k,v in pairs(allPairs[h]) do
+			if v then
+				border = true
+				break
+			end
+		end
+
+		if not border then
+			allPairs[h] = nil
+			allPoints[h] = nil
+		end
+	end
+
+	-- Go around all border points
 
 	local function findCycle()
 		local current = next(allPoints)
@@ -85,11 +102,7 @@ local function polygonize(tiles)
 			current = next
 		end
 
-		if #result > 1 then		-- internal points are still in allPoints
-			return result
-		else
-			return nil
-		end
+		return result
 	end
 
 	local cycles = {}
