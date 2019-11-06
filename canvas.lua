@@ -25,7 +25,7 @@ function Canvas:init(id)
 
 	self.tileDumpArea = js.global.document:getElementById "tileDump"
 	self.tileDumpArea.onchange = function()
-		self:loadTiles(self.tileDumpArea.value)
+		self.geom:loadTiles(self.tileDumpArea.value)
 	end
 
 	self.svg.onwheel = function(target, e)
@@ -189,18 +189,6 @@ function Canvas:fill(type)
 		end
 	end
 
-	self.tileDumpArea.value = self.geom:dumpTiles()
-end
-
-function Canvas:clearTiles()
-
-	self.geom:clearTiles()
-	self.tileDumpArea.value = self.geom:dumpTiles()
-end
-
-function Canvas:loadTiles(str)
-
-	self.geom:loadTiles(str)
 	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
