@@ -237,7 +237,7 @@ function Geom:updateConnections(comp)
 
 			if tile.type == "wire" then
 				connected[tile.component] = true
-				tile.component.connected[comp] = true	-- connect back the wire
+				table.insert(tile.component.connected, comp)	-- connect back the wire
 				i = i + 1
 			else
 				table.remove(comp.endpoints, i)
@@ -246,7 +246,29 @@ function Geom:updateConnections(comp)
 
 	end
 
-	comp.connected = connected
+	-- Flatten list
+
+	local tmp = {}
+	for other,_ in pairs(connected) do
+		table.insert(tmp, other)
+	end
+
+	comp.connected = tmp
+
+	-- Extra checks for transistors
+
+	if comp.type == "transistor" then
+		self:checkTransistor(comp)
+	end
+end
+
+function Geom:checkTransistor(comp)
+
+	if #comp.connected ~= 3 then
+		comp.invalid = true
+		return
+	end
+
 end
 
 function Geom:updateComponents()

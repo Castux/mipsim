@@ -240,6 +240,10 @@ function Canvas:createComponent(comp)
 	svg.classList:add("component")
 	svg.classList:add(comp.type)
 
+	if comp.invalid then
+		svg.classList:add "invalid"
+	end
+
 	-- Bridge endpoints
 
 	if comp.type == "bridge" then
@@ -268,13 +272,13 @@ function Canvas:createComponent(comp)
 	-- Fun stuff
 
 	svg.onmouseenter = function(target)
-		for adj,_ in pairs(comp.connected) do
+		for _,adj in ipairs(comp.connected) do
 			self.svgComponents[adj].classList:add "connected"
 		end
 	end
 
 	svg.onmouseout = function(target)
-		for adj,_ in pairs(comp.connected) do
+		for _,adj in ipairs(comp.connected) do
 			self.svgComponents[adj].classList:remove "connected"
 		end
 	end
