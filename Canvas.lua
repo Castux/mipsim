@@ -43,8 +43,12 @@ function Canvas:init(id)
 	self.geom = Geom()
 	self.svgComponents = {}
 
-	self.geom.componentsUpdatedCB = function(comps)
-		self:onComponentsUpdated(comps)
+	self.geom.componentCreatedCB = function(comp)
+		self:onComponentCreated(comp)
+	end
+
+	self.geom.componentDestroyedCB = function(comp)
+		self:onComponentDestroyed(comp)
 	end
 
 	self:toggleEdit()
@@ -213,26 +217,14 @@ function Canvas:handleKeyPress(key)
 	end
 end
 
-function Canvas:onComponentsUpdated(comps)
+function Canvas:onComponentDestroyed(comp)
 
-	-- Erase all the old ones
+	self.svgComponents[comp]:remove()
+	self.svgComponents[comp] = nil
 
-	for comp, svg in pairs(self.svgComponents) do
-		svg:remove()
-	end
-
-	self.svgComponents = {}
-
-	-- Create all the new ones
-
-	for _, comp in ipairs(comps) do
-		self:createComponent(comp)
-	end
-
-	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
-function Canvas:createComponent(comp)
+function Canvas:onComponentCreated(comp)
 
 	-- Polygon!
 

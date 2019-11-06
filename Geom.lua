@@ -12,7 +12,8 @@ function Geom:init()
 	-- nodes are connected groups of wires and bridges
 
 	self.components = {}
-	self.componentsUpdatedCB = nil
+	self.componentCreatedCB = nil
+	self.componentDestroyedCB = nil
 
 end
 
@@ -298,7 +299,15 @@ end
 
 function Geom:updateComponents()
 
-	self.components = {}
+	-- Erase previous ones
+
+	for i,comp in ipairs(self.components) do
+		if self.componentDestroyedCB then
+			 self.componentDestroyedCB(comp)
+		end
+		self.components[i] = nil
+	end
+
 	local done = {}
 
 	-- Normal components first
@@ -347,11 +356,12 @@ function Geom:updateComponents()
 
 	for _,comp in ipairs(self.components) do
 		comp.adjacentTiles = nil
+
+		if self.componentCreatedCB then
+			self.componentCreatedCB(comp)
+		end
 	end
 
-	if self.componentsUpdatedCB then
-		self.componentsUpdatedCB(self.components)
-	end
 end
 
 return Geom
