@@ -326,8 +326,8 @@ function Canvas:toggleEdit()
 
 	self.editMode = not self.editMode
 
-	self.tileDumpArea.style.display = self.editMode and "block" or "none"
-	self.selectRect.style.display = self.editMode and "block" or "none"
+	self.tileDumpArea.style.display = self.editMode and "initial" or "none"
+	self.selectRect.style.display = self.editMode and "initial" or "none"
 
 end
 
