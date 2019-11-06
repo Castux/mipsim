@@ -172,9 +172,12 @@ function Geom:computeComponent(tile, bridge)
 		for i,j in neighbours(current.x, current.y) do
 			local neigh = self:getTile(i,j)
 			if neigh then
-				local valid = bridge and
-					(neigh.bridge) or
-					(neigh.type == tile.type)
+				local valid
+			 	if bridge then
+					valid = neigh.bridge
+				else
+					valid = neigh.type == tile.type
+				end
 
 				if valid then
 					table.insert(queue, neigh)

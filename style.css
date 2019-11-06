@@ -48,7 +48,8 @@ svg > #background
 	stroke-width: 1px;
 	stroke: orange;
 	stroke-dasharray: 1px;
-	fill: none;
+	fill: orange;
+	fill-opacity: 25%;
 }
 
 .component:hover
