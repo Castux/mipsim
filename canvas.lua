@@ -20,6 +20,7 @@ function Canvas:init(id)
 
 	self.mainLayer = self.svg:getElementById "mainLayer"
 	self.bridgeLayer = self.svg:getElementById "bridgeLayer"
+	self.componentsLayer = self.svg:getElementById "componentsLayer"
 
 	self:createSelectRect()
 
@@ -41,9 +42,14 @@ function Canvas:init(id)
 
 	self.geom = Geom()
 	self.svgTiles = {}
+	self.svgComponents = {}
 
 	self.geom.tileUpdatedCB = function(tile, deleted)
 		self:onTileUpdated(tile, deleted)
+	end
+
+	self.geom.componentsUpdatedCB = function(comps)
+		self:onComponentsUpdated(comps)
 	end
 end
 
@@ -189,6 +195,7 @@ function Canvas:fill(type)
 		end
 	end
 
+	self.geom:updateComponents()
 	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
@@ -240,7 +247,38 @@ function Canvas:handleKeyPress(key)
 	elseif key == "B" then
 		self:fill("resetBridge")
 	end
+end
 
+function Canvas:onComponentsUpdated(comps)
+
+	-- Erase all the old ones
+
+	for comp, svg in pairs(self.svgComponents) do
+		svg:remove()
+	end
+
+	self.svgComponents = {}
+
+	-- Create all the new ones
+
+	for _, comp in ipairs(comps) do
+		self:createComponent(comp)
+	end
+
+end
+
+function Canvas:createComponent(comp)
+
+	-- One dot anywhere for debug purposes
+	local tile = next(comp)
+
+	local svg = js.global.document:createElementNS(svgNS, "circle")
+	svg:setAttribute("r", tileSize / 4)
+	svg:setAttribute("cx", (tile.x + 0.5) * tileSize)
+	svg:setAttribute("cy", (tile.y + 0.5) * tileSize)
+
+	self.componentsLayer:appendChild(svg)
+	self.svgComponents[comp] = svg
 end
 
 return Canvas

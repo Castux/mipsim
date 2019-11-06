@@ -12,14 +12,8 @@ function Geom:init()
 	-- segments are adjacent tiles of the same type
 	-- nodes are connected groups of wires and bridges
 
-	self.segments = {}
-	self.nodes = {}
-
-	-- transistors have exactly three nodes connected
-
-	self.transistors = {}
-
-	-- node adjancency somehow
+	self.components = {}
+	self.componentsUpdatedCB = nil
 
 end
 
@@ -131,6 +125,8 @@ function Geom:loadTiles(str)
 			self:setTile(t.x, t.y, "bridge")
 		end
 	end
+
+	self:updateComponents()
 end
 
 local function neighbours(x,y)
@@ -147,7 +143,7 @@ local function neighbours(x,y)
 
 end
 
-function Geom:getComponent(tile)
+function Geom:computeComponent(tile)
 
 	if not tile then
 		return
@@ -178,23 +174,26 @@ function Geom:getComponent(tile)
 	return comp
 end
 
-function Geom:getAllComponents()
+function Geom:updateComponents()
 
-	local components = {}
+	self.components = {}
 	local done = {}
 
 	for x,y,tile in self:iterTiles() do
 		if not done[tile] then
-			local comp = self:getComponent(tile)
+			local comp = self:computeComponent(tile)
 
 			for tile in pairs(comp) do
 				done[tile] = true
+				tile.component = comp
 			end
-			table.insert(components, comp)
+			table.insert(self.components, comp)
 		end
 	end
 
-	return components
+	if self.componentsUpdatedCB then
+		self.componentsUpdatedCB(self.components)
+	end
 end
 
 return Geom
