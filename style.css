@@ -54,6 +54,7 @@ svg > #background
 {
 	stroke: #d0a1d0;
 	stroke-width: 2px;
+	stroke-linecap: round;
 }
 
 .component.bridge, .endpoint

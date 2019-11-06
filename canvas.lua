@@ -21,6 +21,8 @@ function Canvas:init(id)
 
 	self.background = self.svg:getElementById "background"
 	self.componentsLayer = self.svg:getElementById "componentsLayer"
+	self.transistorsLayer = self.svg:getElementById "transistorsLayer"
+	self.bridgesLayer = self.svg:getElementById "bridgesLayer"
 
 	self:createSelectRect()
 
@@ -285,7 +287,17 @@ function Canvas:createComponent(comp)
 
 	-- Add to canvas!
 
-	self.componentsLayer:appendChild(svg)
+	local layer
+
+	if comp.type == "transistor" then
+		layer = self.transistorsLayer
+	elseif comp.type == "bridge" then
+		layer = self.bridgesLayer
+	else
+		layer = self.componentsLayer
+	end
+
+	layer:appendChild(svg)
 	self.svgComponents[comp] = svg
 
 	-- Fun stuff
