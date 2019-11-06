@@ -15,6 +15,11 @@ function Geom:init()
 	self.componentCreatedCB = nil
 	self.componentDestroyedCB = nil
 
+	-- Live update
+
+	self.dirtyTiles = {}		-- need new component
+	self.dirtyComponents = {}	-- need to recheck connections
+
 end
 
 function Geom:setTile(x,y,type)
@@ -249,7 +254,6 @@ function Geom:updateConnections(comp)
 
 	else
 		comp.endpoints = self:endpoints(comp)
-		print(comp.endpoints, #comp.endpoints)
 
 		for _,tile in ipairs(comp.endpoints) do
 			comp.connected[tile.component] = true
@@ -313,15 +317,29 @@ function Geom:checkTransistor(comp)
 	comp.sd2Tile = adj2
 end
 
+function Geom:deleteComponent(comp)
+
+	for _,tile in ipairs(comp) do
+		self.dirtyTiles[tile] = true
+	end
+
+	for conn in pairs(comp.connected) do
+		self.dirtyComponents[conn] = true
+	end
+
+	if self.componentDestroyedCB then
+		 self.componentDestroyedCB(comp)
+	end
+	self.components[comp] = nil
+
+end
+
 function Geom:updateComponents()
 
 	-- Erase previous ones
 
-	for i,comp in ipairs(self.components) do
-		if self.componentDestroyedCB then
-			 self.componentDestroyedCB(comp)
-		end
-		self.components[i] = nil
+	for comp in pairs(self.components) do
+		self:deleteComponent(comp)
 	end
 
 	local done = {}
@@ -335,7 +353,8 @@ function Geom:updateComponents()
 				done[tile] = true
 				tile.component = comp
 			end
-			table.insert(self.components, comp)
+			self.components[comp] = true
+			self.dirtyComponents[comp] = true
 		end
 	end
 
@@ -350,7 +369,8 @@ function Geom:updateComponents()
 				done[tile] = true
 				tile.bridgeComponent = comp
 			end
-			table.insert(self.components, comp)
+			self.components[comp] = true
+			self.dirtyComponents[comp] = true
 		end
 	end
 
@@ -364,13 +384,13 @@ function Geom:updateComponents()
 
 	-- Update connections
 
-	for _,comp in ipairs(self.components) do
+	for comp in pairs(self.components) do
 		self:updateConnections(comp)
 	end
 
 	-- Extra pass for transistors
 
-	for _,comp in ipairs(self.components) do
+	for comp in pairs(self.components) do
 		if comp.type == "transistor" then
 			self:checkTransistor(comp)
 		end
@@ -378,7 +398,7 @@ function Geom:updateComponents()
 
 	-- Cleanup
 
-	for _,comp in ipairs(self.components) do
+	for comp in pairs(self.components) do
 		if self.componentCreatedCB then
 			self.componentCreatedCB(comp)
 		end
