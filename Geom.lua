@@ -155,7 +155,6 @@ function Geom:computeComponent(tile, bridge)
 
 	local comp = {}
 	local endpoints = {}
-	local adjacentTiles = {}
 	local queue = { tile }
 
 	while #queue > 0 do
@@ -179,8 +178,6 @@ function Geom:computeComponent(tile, bridge)
 			if valid then
 				neighbourCount = neighbourCount + 1
 				table.insert(queue, neigh)
-			elseif neigh.type then
-				adjacentTiles[neigh] = true
 			end
 		end
 
@@ -202,23 +199,35 @@ function Geom:computeComponent(tile, bridge)
 	comp.type = bridge and "bridge" or tile.type
 	if bridge then
 		comp.endpoints = endpoints
-	else
-		comp.adjacentTiles = adjacentTiles
 	end
 
 	return comp
 end
 
+function Geom:adjacentTiles(comp)
+
+	return coroutine.wrap(function()
+		for _,tile in ipairs(comp) do
+			for neigh in self:neighbours(tile) do
+				if neigh.component and neigh.component ~= comp then
+					coroutine.yield(neigh)
+				end
+			end
+		end
+	end)
+
+end
+
 function Geom:updateConnections(comp)
 
-	local connected = {}
+	comp.connected = {}
 
 	-- Regular components
 
 	if comp.type ~= "bridge" then
 
-		for tile,_ in pairs(comp.adjacentTiles) do
-			connected[tile.component] = true
+		for n in self:adjacentTiles(comp) do
+			comp.connected[n.component] = true
 		end
 
 	-- Bridge components
@@ -230,7 +239,7 @@ function Geom:updateConnections(comp)
 			local tile = comp.endpoints[i]
 
 			if tile.type == "wire" then
-				connected[tile.component] = true
+				comp.connected[tile.component] = true
 				table.insert(tile.component.connected, comp)	-- connect back the wire
 				i = i + 1
 			else
@@ -243,17 +252,17 @@ function Geom:updateConnections(comp)
 	-- Flatten list
 
 	local tmp = {}
-	for other,_ in pairs(connected) do
+	for other,_ in pairs(comp.connected) do
 		table.insert(tmp, other)
 	end
 
 	comp.connected = tmp
 end
 
-local function findStraightLine(t)
+function Geom:findStraightLine(t)
 
-	for adj in pairs(t.adjacentTiles) do
-		for adj2 in pairs(t.adjacentTiles) do
+	for adj in self:adjacentTiles(t) do
+		for adj2 in self:adjacentTiles(t) do
 
 			if adj.component ~= adj2.component and
 				(adj.x == adj2.x or adj.y == adj2.y) then
@@ -266,14 +275,14 @@ local function findStraightLine(t)
 	return nil
 end
 
-local function checkTransistor(comp)
+function Geom:checkTransistor(comp)
 
 	if #comp.connected ~= 3 then
 		comp.invalid = true
 		return
 	end
 
-	local adj, adj2 = findStraightLine(comp)
+	local adj, adj2 = self:findStraightLine(comp)
 	if not adj then
 		comp.invalid = true
 		return
@@ -342,6 +351,14 @@ function Geom:updateComponents()
 		end
 	end
 
+	-- All tiles should have components!
+
+	for x,y,tile in self:iterTiles() do
+		if not tile.component and not tile.bridgeComponent then
+			error "Tile without component"
+		end
+	end
+
 	-- Update connections
 
 	for _,comp in ipairs(self.components) do
@@ -352,7 +369,7 @@ function Geom:updateComponents()
 
 	for _,comp in ipairs(self.components) do
 		if comp.type == "transistor" then
-			checkTransistor(comp)
+			self:checkTransistor(comp)
 		end
 	end
 
