@@ -1,6 +1,7 @@
 local class = require "class"
 local js = require "js"
 local Geom = require "Geom"
+local polygonize = require "polygonize"
 
 local scrollSpeed = 1.03
 local tileSize = 10
@@ -269,13 +270,26 @@ end
 
 function Canvas:createComponent(comp)
 
-	-- One dot anywhere for debug purposes
-	local tile = comp[1]
+	-- Polygon!
 
-	local svg = js.global.document:createElementNS(svgNS, "circle")
-	svg:setAttribute("r", tileSize / 4)
-	svg:setAttribute("cx", (tile.x + 0.5) * tileSize)
-	svg:setAttribute("cy", (tile.y + 0.5) * tileSize)
+	local poly = polygonize(comp)
+	local str = {}
+
+	for _, path in ipairs(poly) do
+		for i,point in ipairs(path) do
+			str[#str + 1] = string.format("%s%d %d",
+				i == 1 and "M" or "L",
+				point[1] * tileSize,
+				point[2] * tileSize)
+		end
+		str[#str + 1] = "Z"
+	end
+
+	str = table.concat(str, " ")
+
+	local svg = js.global.document:createElementNS(svgNS, "path")
+	svg:setAttribute("d", str)
+	svg.classList:add("component")
 
 	self.componentsLayer:appendChild(svg)
 	self.svgComponents[comp] = svg

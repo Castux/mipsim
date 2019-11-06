@@ -49,3 +49,11 @@ svg > #background
 	stroke-width: 1px;
 	stroke: darkgrey;
 }
+
+.component
+{
+	stroke-width: 2px;
+	stroke: orange;
+	stroke-dasharray: 2px;
+	fill: none;
+}
