@@ -7,7 +7,6 @@ function Geom:init()
 	-- flat [x][y] arrays of tile types
 
 	self.tiles = {}
-	self.tileUpdatedCB = nil
 
 	-- segments are adjacent tiles of the same type
 	-- nodes are connected groups of wires and bridges
@@ -38,10 +37,6 @@ function Geom:setTile(x,y,type)
 	else
 		tile.type = type
 	end
-
-	if self.tileUpdatedCB then
-		self.tileUpdatedCB(tile)
-	end
 end
 
 function Geom:getTile(x,y)
@@ -64,10 +59,6 @@ function Geom:resetTile(x,y,type)
 	if not tile.type and not tile.bridge then
 		self.tiles[x][y] = nil
 		deleted = true
-	end
-
-	if self.tileUpdatedCB then
-		self.tileUpdatedCB(tile, deleted)
 	end
 end
 
