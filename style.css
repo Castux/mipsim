@@ -6,11 +6,6 @@
 	stroke-dasharray: 1px;
 }
 
-.selectRect.hidden
-{
-	visibility: hidden;
-}
-
 svg > #background
 {
 	width: 100%;

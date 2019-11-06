@@ -46,6 +46,8 @@ function Canvas:init(id)
 	self.geom.componentsUpdatedCB = function(comps)
 		self:onComponentsUpdated(comps)
 	end
+
+	self:toggleEdit()
 end
 
 function Canvas:createSelectRect()
@@ -54,7 +56,6 @@ function Canvas:createSelectRect()
 	rect:setAttribute("width", tileSize)
 	rect:setAttribute("height", tileSize)
 	rect.classList:add("selectRect")
-	rect.classList:add("hidden")
 
 	self.svg:appendChild(rect)
 	self.selectRect = rect
@@ -183,20 +184,26 @@ function Canvas:handleKeyPress(key)
 	if key == "Escape" then
 		self:deselect()
 
-	elseif key == "w" then
-		self:fill("wire")
-	elseif key == "p" then
-		self:fill("power")
-	elseif key == "g" then
-		self:fill("ground")
-	elseif key == "t" then
-		self:fill("transistor")
-	elseif key == "b" then
-		self:fill("bridge")
-	elseif key == "Backspace" then
-		self:fill("reset")
-	elseif key == "B" then
-		self:fill("resetBridge")
+	elseif key == "e" then
+		self:toggleEdit()
+	end
+
+	if self.editMode then
+		if key == "w" then
+			self:fill("wire")
+		elseif key == "p" then
+			self:fill("power")
+		elseif key == "g" then
+			self:fill("ground")
+		elseif key == "t" then
+			self:fill("transistor")
+		elseif key == "b" then
+			self:fill("bridge")
+		elseif key == "Backspace" then
+			self:fill("reset")
+		elseif key == "B" then
+			self:fill("resetBridge")
+		end
 	end
 end
 
@@ -313,6 +320,15 @@ function Canvas:createComponent(comp)
 			self.svgComponents[adj].classList:remove "connected"
 		end
 	end
+end
+
+function Canvas:toggleEdit()
+
+	self.editMode = not self.editMode
+
+	self.tileDumpArea.style.display = self.editMode and "block" or "none"
+	self.selectRect.style.display = self.editMode and "block" or "none"
+
 end
 
 return Canvas
