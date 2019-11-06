@@ -148,7 +148,6 @@ function Canvas:fill(type)
 	end
 
 	self.geom:updateComponents()
-	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
 function Canvas:zoom(factor)
@@ -203,6 +202,13 @@ function Canvas:handleKeyPress(key)
 			self:fill("reset")
 		elseif key == "B" then
 			self:fill("resetBridge")
+		elseif key == "x" then
+			self:editCut()
+		elseif key == "c" then
+			self:editCut("copy")
+		elseif key == "v" then
+			self:editPaste()
+
 		end
 	end
 end
@@ -223,6 +229,7 @@ function Canvas:onComponentsUpdated(comps)
 		self:createComponent(comp)
 	end
 
+	self.tileDumpArea.value = self.geom:dumpTiles()
 end
 
 function Canvas:createComponent(comp)
@@ -329,6 +336,54 @@ function Canvas:toggleEdit()
 	self.tileDumpArea.style.display = self.editMode and "initial" or "none"
 	self.selectRect.style.display = self.editMode and "initial" or "none"
 
+end
+
+function Canvas:editCut(copy)
+
+	if not self.selection then
+		return
+	end
+
+	local clipboard = {}
+	local left,top,w,h = table.unpack(self.selection)
+
+	for i = left, left + w - 1 do
+		for j = top, top + h - 1 do
+
+			local tile = self.geom:getTile(i,j)
+
+			if tile and tile.type then
+				table.insert(clipboard, {tile.x - left, tile.y - top, tile.type})
+				if not copy then
+					self:resetTile(i,j)
+				end
+			end
+
+			if tile and tile.bridge then
+				table.insert(clipboard, {tile.x - left, tile.y - top, "bridge"})
+				if not copy then
+					self:resetTile(i,j,"bridge")
+				end
+			end
+		end
+	end
+
+	self.clipboard = clipboard
+	self.geom:updateComponents()
+end
+
+function Canvas:editPaste()
+	if not self.selection or not self.clipboard then
+		return
+	end
+
+	local left,top,w,h = table.unpack(self.selection)
+
+	for _,tile in ipairs(self.clipboard) do
+		self:setTile(tile[1] + left, tile[2] + top, tile[3])
+	end
+
+	self.geom:updateComponents()
 end
 
 return Canvas
