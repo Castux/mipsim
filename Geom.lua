@@ -7,7 +7,6 @@ function Geom:init()
 	-- flat [x][y] arrays of tile types
 
 	self.tiles = {}
-
 	self.tileUpdatedCB = nil
 
 	-- segments are adjacent tiles of the same type
@@ -146,6 +145,56 @@ local function neighbours(x,y)
 		end
 	end)
 
+end
+
+function Geom:getComponent(tile)
+
+	if not tile then
+		return
+	end
+
+	local comp = {}
+	local queue = { tile }
+
+	while #queue > 0 do
+
+		local current = table.remove(queue)
+		if comp[current] then
+			goto skip
+		end
+
+		comp[current] = true
+
+		for i,j in neighbours(current.x, current.y) do
+			local neigh = self:getTile(i,j)
+			if neigh and neigh.type == tile.type then
+				table.insert(queue, neigh)
+			end
+		end
+
+		::skip::
+	end
+
+	return comp
+end
+
+function Geom:getAllComponents()
+
+	local components = {}
+	local done = {}
+
+	for x,y,tile in self:iterTiles() do
+		if not done[tile] then
+			local comp = self:getComponent(tile)
+
+			for tile in pairs(comp) do
+				done[tile] = true
+			end
+			table.insert(components, comp)
+		end
+	end
+
+	return components
 end
 
 return Geom
