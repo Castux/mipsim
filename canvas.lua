@@ -91,9 +91,9 @@ function Canvas:onMouseMove(target, ev)
 		self.selectRect:setAttribute("y", top * tileSize)
 		self.selectRect:setAttribute("width", w * tileSize)
 		self.selectRect:setAttribute("height", h * tileSize)
-		self.selectRect.classList:remove("hidden")
 
 		self.selection = {left, top, w, h}
+		self.selectRect.style.display = "initial"
 	end
 end
 
@@ -334,8 +334,12 @@ function Canvas:toggleEdit()
 	self.editMode = not self.editMode
 
 	self.tileDumpArea.style.display = self.editMode and "initial" or "none"
-	self.selectRect.style.display = self.editMode and "initial" or "none"
 
+	if not self.editMode then
+		self.selection = nil
+		self.clipboard = nil
+		self.selectRect.style.display = "none"
+	end
 end
 
 function Canvas:editCut(copy)
