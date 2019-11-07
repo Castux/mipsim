@@ -48,6 +48,9 @@ function Simulator:update(comp, parentTransistors)
 	for c in pairs(group) do
 
 		local prev = self.values[c]
+		if prev == "unstable" then
+			goto skip
+		end
 
 		-- Change it
 
@@ -75,6 +78,8 @@ function Simulator:update(comp, parentTransistors)
 
 			parentTransistors[c] = false
 		end
+
+		::skip::
 	end
 end
 

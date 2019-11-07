@@ -237,6 +237,8 @@ function Canvas:handleKeyPress(key)
 
 	elseif key == "e" then
 		self:toggleEdit()
+	elseif key == "E" then
+		self:toggleEdit("steps")
 	end
 
 	if self.editMode then
@@ -386,7 +388,7 @@ function Canvas:onComponentUpdated(comp)
 	end
 end
 
-function Canvas:toggleEdit()
+function Canvas:toggleEdit(steps)
 
 	self.editMode = not self.editMode
 
@@ -397,7 +399,7 @@ function Canvas:toggleEdit()
 		self.clipboard = nil
 		self.selectRect.style.display = "none"
 
-		self:startSimulation()
+		self:startSimulation(steps)
 	else
 		self:stopSimulation()
 	end
@@ -478,7 +480,7 @@ local function stepSimulation(wrap)
 	local res = wrap()
 
 	if res == "paused" then
-		js.global:setTimeout(function() stepSimulation(wrap) end, 400)
+		js.global:setTimeout(function() stepSimulation(wrap) end, 300)
 	end
 end
 
@@ -502,9 +504,10 @@ function Canvas:setPin(comp, val)
 	stepSimulation(wrap)
 end
 
-function Canvas:startSimulation()
+function Canvas:startSimulation(stepped)
+
 	self.simulator = Simulator(self.geom)
-	self.simulator.stepped = true
+	self.simulator.stepped = stepped
 
 	self.simulator.valueChangedCB = function(comp, value)
 		self:onValueChanged(comp, value)
