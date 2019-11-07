@@ -12,16 +12,13 @@ function Simulator:setup()
 
 	self.values = {}
 	self.pins = {}
-	self.needUpdate = {}
 
 	for comp in pairs(self.geom.components) do
 
 		if comp.type == "power" or comp.type == "ground" then
-			table.insert(self.needUpdate, comp)
+			self:update(comp)
 		end
 	end
-
-	self:update()
 end
 
 local function oppositeValues(a,b)
@@ -29,13 +26,14 @@ local function oppositeValues(a,b)
 		(a == "low" and b == "high")
 end
 
-function Simulator:update()
+function Simulator:update(firstComp)
 
 	local done = {}
+	local queue = {firstComp}
 
-	while #self.needUpdate > 0 do
+	while #queue > 0 do
 
-		local comp = table.remove(self.needUpdate)
+		local comp = table.remove(queue)
 
 		local group = self:findGroup(comp)
 		local value = self:computeGroupValue(group)
@@ -45,33 +43,30 @@ function Simulator:update()
 		for c in pairs(group) do
 
 			local prev = self.values[c]
-			self.values[c] = value
+			local newVal = value
 
 			-- Detect circular dependencies: oscillating transistors
 
-			if c.type == "transistor" and
-				done[c] and
-				oppositeValues(prev, value) then
-				self.values[c] = "unstable"
+			if done[c] and newVal ~= prev and c.type == "transistor" then
+				newVal = "unstable"
 			end
 
 			-- Notify
 
-			if prev ~= self.values[c] and self.valueChangedCB then
-				self.valueChangedCB(c, self.values[c])
+			if prev ~= newVal and self.valueChangedCB then
+				self.valueChangedCB(c, newVal)
 			end
 
 			-- Transistors that switch can modify other groups
 
-			if c.type == "transistor" and prev ~= self.values[c] then
-				table.insert(self.needUpdate, c.sd1)
-				table.insert(self.needUpdate, c.sd2)
+			if c.type == "transistor" and prev ~= newVal and not done[c] then
+				table.insert(queue, c.sd1)
+				table.insert(queue, c.sd2)
 			end
 
 			done[c] = true
+			self.values[c] = newVal
 		end
-
-		::skip::
 	end
 end
 
@@ -160,9 +155,7 @@ function Simulator:setPin(comp, value)
 	assert(comp.type == "wire")
 
 	self.pins[comp] = value
-	table.insert(self.needUpdate, comp)
-
-	self:update()
+	self:update(comp)
 end
 
 return Simulator
