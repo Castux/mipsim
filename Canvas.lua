@@ -463,12 +463,10 @@ function Canvas:onValueChanged(comp, value)
 	self:resetValue(comp)
 
 	local svg = self.svgComponents[comp]
-	if svg then
-		svg.classList:add(value)
+	svg.classList:add(value)
 
-		if self.simulator.pins[comp] then
-			svg.classList:add "pinned"
-		end
+	if self.simulator.pins[comp] then
+		svg.classList:add "pinned"
 	end
 end
 
