@@ -43,8 +43,8 @@ function Canvas:init(id)
 	self.geom = Geom()
 	self.svgComponents = {}
 
-	self.geom.componentCreatedCB = function(comp)
-		self:onComponentCreated(comp)
+	self.geom.componentUpdatedCB = function(comp)
+		self:onComponentUpdated(comp)
 	end
 
 	self.geom.componentDestroyedCB = function(comp)
@@ -224,7 +224,14 @@ function Canvas:onComponentDestroyed(comp)
 
 end
 
-function Canvas:onComponentCreated(comp)
+function Canvas:onComponentUpdated(comp)
+
+	-- Callback is for updated/created
+	-- We just delete-remake
+
+	if self.svgComponents[comp] then
+		self:onComponentDestroyed(comp)
+	end
 
 	-- Polygon!
 

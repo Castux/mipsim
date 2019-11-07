@@ -12,7 +12,7 @@ function Geom:init()
 	-- nodes are connected groups of wires and bridges
 
 	self.components = {}
-	self.componentCreatedCB = nil
+	self.componentUpdatedCB = nil
 	self.componentDestroyedCB = nil
 
 	-- Live update
@@ -312,6 +312,13 @@ end
 
 function Geom:checkTransistor(comp)
 
+	comp.invalid = nil
+	comp.sd1 = nil
+	comp.sd2 = nil
+	comp.gate = nil
+	comp.sd1Tile = nil
+	comp.sd2Tile = nil
+
 	local count = 0
 	for c in pairs(comp.connected) do
 		count = count + 1
@@ -445,9 +452,9 @@ function Geom:updateComponents()
 
 	-- Cleanup
 
-	for comp in pairs(newComponents) do
-		if self.componentCreatedCB then
-			self.componentCreatedCB(comp)
+	for comp in pairs(self.dirtyComponents) do
+		if self.componentUpdatedCB then
+			self.componentUpdatedCB(comp)
 		end
 	end
 
