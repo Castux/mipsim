@@ -9,7 +9,7 @@
 	</head>
 
 	<body>
-		<div>
+		<div id="canvasContainer">
 			<svg id="canvas" width="800" height="600" viewBox="0 0 400 300">
 				<rect id="background" />
 				<g id="componentsLayer" />
@@ -17,8 +17,9 @@
 				<g id="bridgesLayer" />
 			</svg>
 		</div>
-		<div>
-			<textarea id="tileDump" rows="50" cols="80"></textarea>
+		<div id="saveBox">
+			<input id="savePath" type="text" placeholder="test.txt" value="test.txt"></input>
+			<button id="saveButton">Save</button>
 		</div>
 	</body>
 

@@ -26,18 +26,9 @@ function Canvas:init(id)
 
 	self:createSelectRect()
 
-	self.tileDumpArea = js.global.document:getElementById "tileDump"
-	self.tileDumpArea.onchange = function()
-		self.geom:loadTiles(self.tileDumpArea.value)
-	end
-
 	self.svg.onwheel = function(target, e)
 		e:preventDefault()
 		self:zoom(e.deltaY > 0 and scrollSpeed or 1/scrollSpeed)
-	end
-
-	js.global.document.onkeydown = function(target, e)
-		self:handleKeyPress(e.key)
 	end
 
 	self.geom = Geom()
@@ -51,7 +42,36 @@ function Canvas:init(id)
 		self:onComponentDestroyed(comp)
 	end
 
+	local savePath = js.global.document:getElementById "savePath"
+	local saveButton = js.global.document:getElementById "saveButton"
+	saveButton.onclick = function()
+		local path = savePath.value
+		self:downloadFile(path, self.geom:dumpTiles())
+	end
+
+	self.saveBox = js.global.document:getElementById "saveBox"
+
+	js.global.document.onkeydown = function(target, e)
+		if e.target ~= savePath then
+			self:handleKeyPress(e.key)
+		end
+	end
+
 	self:toggleEdit()
+end
+
+function Canvas:downloadFile(path, content)
+
+	local element = js.global.document:createElement "a"
+	element:setAttribute('href', 'data:text/plain;charset=utf-8,' .. js.global:encodeURIComponent(content))
+	element:setAttribute('download', path);
+
+	element.style.display = 'none'
+	js.global.document.body:appendChild(element)
+
+	element:click()
+
+	js.global.document.body:removeChild(element)
 end
 
 function Canvas:createSelectRect()
@@ -81,6 +101,8 @@ end
 
 function Canvas:onMouseMove(target, ev)
 
+	if not self.editMode then return end
+
 	self:updateMousePosition(target, ev)
 
 	if self.dragStartX and self.dragStartY then
@@ -102,6 +124,8 @@ function Canvas:onMouseMove(target, ev)
 end
 
 function Canvas:onMouseDown(target, ev)
+
+	if not self.editMode then return end
 
 	self:onMouseMove(target, ev)
 
@@ -332,7 +356,7 @@ function Canvas:toggleEdit()
 
 	self.editMode = not self.editMode
 
-	self.tileDumpArea.style.display = self.editMode and "initial" or "none"
+	self.saveBox.style.display = self.editMode and "none" or "initial"
 
 	if not self.editMode then
 		self.selection = nil
