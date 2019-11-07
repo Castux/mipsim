@@ -93,7 +93,6 @@ function Canvas:loadFile(file)
 	local reader = js.new(js.global.FileReader)
 	reader.onloadend = function()
 		self.geom:loadTiles(reader.result)
-		self:startSimulation()
 	end
 
 	reader:readAsText(file)
@@ -391,7 +390,7 @@ function Canvas:toggleEdit()
 
 	self.editMode = not self.editMode
 
-	self.saveBox.style.display = self.editMode and "none" or "initial"
+	self.saveBox.style.display = self.editMode and "initial" or "none"
 
 	if not self.editMode then
 		self.selection = nil
