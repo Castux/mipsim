@@ -1,6 +1,7 @@
 local class = require "class"
 local js = require "js"
 local Geom = require "Geom"
+local Simulator = require "Simulator"
 local polygonize = require "polygonize"
 
 local scrollSpeed = 1.03
@@ -381,6 +382,10 @@ function Canvas:toggleEdit()
 		self.selection = nil
 		self.clipboard = nil
 		self.selectRect.style.display = "none"
+
+		self.simulator = Simulator(self.geom, function(comp, value)
+			self:onValueChanged(comp, value)
+		end)
 	end
 end
 
@@ -430,6 +435,10 @@ function Canvas:editPaste()
 	end
 
 	self.geom:updateComponents()
+end
+
+function Canvas:onValueChanged(comp, value)
+	print("New value", comp, value)
 end
 
 return Canvas
