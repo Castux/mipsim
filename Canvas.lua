@@ -57,6 +57,11 @@ function Canvas:init(id)
 		end
 	end
 
+	local loadButton = js.global.document:getElementById "loadButton"
+	loadButton.onchange = function(target, e)
+		self:loadFile(e.target.files[0])
+	end
+
 	self:toggleEdit()
 end
 
@@ -72,6 +77,20 @@ function Canvas:downloadFile(path, content)
 	element:click()
 
 	js.global.document.body:removeChild(element)
+end
+
+function Canvas:loadFile(file)
+
+	if file == js.null then
+		return
+	end
+
+	local reader = js.new(js.global.FileReader)
+	reader.onloadend = function()
+		self.geom:loadTiles(reader.result)
+	end
+
+	reader:readAsText(file)
 end
 
 function Canvas:createSelectRect()
