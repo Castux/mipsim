@@ -443,6 +443,8 @@ end
 
 function Canvas:resetValue(comp)
 	local svg = self.svgComponents[comp]
+	if not svg then return end
+
 	svg.classList:remove "low"
 	svg.classList:remove "high"
 	svg.classList:remove "unstable"

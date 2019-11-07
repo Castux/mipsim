@@ -44,21 +44,21 @@ function Simulator:update()
 			local prev = self.values[c]
 			self.values[c] = value
 
-			-- Notify
-
-			if prev ~= value and self.valueChangedCB then
-				self.valueChangedCB(c, value)
-			end
-
 			-- Detect circular dependencies
 
-			if prev ~= value and done[c] then
+			if prev ~= self.values[c] and done[c] then
 				self.values[c] = "unstable"
+			end
+
+			-- Notify
+
+			if prev ~= self.values[c] and self.valueChangedCB then
+				self.valueChangedCB(c, self.values[c])
 			end
 
 			-- Transistors that switch can modify other groups
 
-			if c.type == "transistor" and prev ~= value then
+			if c.type == "transistor" and prev ~= self.values[c] then
 				table.insert(self.needUpdate, c.sd1)
 				table.insert(self.needUpdate, c.sd2)
 			end
