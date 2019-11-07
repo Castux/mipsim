@@ -120,9 +120,9 @@ end
 
 function Canvas:onMouseMove(target, ev)
 
-	if not self.editMode then return end
-
 	self:updateMousePosition(target, ev)
+
+	if not self.editMode then return end
 
 	if self.dragStartX and self.dragStartY then
 
