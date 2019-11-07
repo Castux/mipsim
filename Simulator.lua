@@ -23,6 +23,11 @@ function Simulator:setup()
 	self:update()
 end
 
+local function oppositeValues(a,b)
+	return (a == "high" and b == "low") or
+		(a == "low" and b == "high")
+end
+
 function Simulator:update()
 
 	local done = {}
@@ -47,7 +52,7 @@ function Simulator:update()
 
 			-- Detect circular dependencies
 
-			if prev ~= self.values[c] and done[c] then
+			if done[c] and oppositeValues(prev, value) then
 				self.values[c] = "unstable"
 			end
 
