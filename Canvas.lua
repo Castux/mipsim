@@ -64,6 +64,10 @@ function Canvas:init(id)
 	end
 
 	self:toggleEdit()
+
+	self.svg.oncontextmenu = function(t,e)
+		e:preventDefault()
+	end
 end
 
 function Canvas:downloadFile(path, content)
@@ -346,9 +350,9 @@ function Canvas:onComponentUpdated(comp)
 	-- Pinnable wires
 
 	if comp.type == "wire" then
-		svg.onclick = function()
+		svg.onmousedown = function(t, e)
 			if not self.editMode then
-				self:togglePin(comp)
+				self:setPin(comp, e.button == 0 and "high" or "low")
 			end
 		end
 	end
@@ -470,20 +474,16 @@ function Canvas:onValueChanged(comp, value)
 	end
 end
 
-function Canvas:togglePin(comp)
-	local pin = self.simulator.pins[comp]
+function Canvas:setPin(comp, val)
+	local old = self.simulator.pins[comp]
 
-	if not pin then
-		pin = "high"
-	elseif pin == "high" then
-		pin = "low"
-	else
-		pin = nil
+	if val == old then
+		val = nil
 	end
 
-	self.simulator:setPin(comp, pin)
+	self.simulator:setPin(comp, val)
 
-	if pin then
+	if val then
 		self.svgComponents[comp].classList:add "pinned"
 	else
 		self.svgComponents[comp].classList:remove "pinned"
