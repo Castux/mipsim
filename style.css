@@ -74,3 +74,24 @@ svg > #background
 	stroke-width: 2px;
 	stroke-dasharray: 2px;
 }
+
+.component.high
+{
+	stroke: pink;
+	stroke-width: 2px;
+	stroke-dasharray: 0px;
+}
+
+.component.low
+{
+	stroke: lightblue;
+	stroke-width: 2px;
+	stroke-dasharray: 0px;
+}
+
+.component.unstable
+{
+	stroke: brown;
+	stroke-width: 2px;
+	stroke-dasharray: 0px;
+}

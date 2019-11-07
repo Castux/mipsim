@@ -386,6 +386,10 @@ function Canvas:toggleEdit()
 		self.simulator = Simulator(self.geom, function(comp, value)
 			self:onValueChanged(comp, value)
 		end)
+	else
+		for comp,svg in pairs(self.svgComponents) do
+			self:resetValue(comp)
+		end
 	end
 end
 
@@ -437,8 +441,17 @@ function Canvas:editPaste()
 	self.geom:updateComponents()
 end
 
+function Canvas:resetValue(comp)
+	local svg = self.svgComponents[comp]
+	svg.classList:remove "low"
+	svg.classList:remove "high"
+	svg.classList:remove "unstable"
+	svg.classList:remove "floating"
+end
+
 function Canvas:onValueChanged(comp, value)
-	print("New value", comp, value)
+	self:resetValue(comp)
+	self.svgComponents[comp].classList:add(value)
 end
 
 return Canvas
