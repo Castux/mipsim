@@ -95,3 +95,13 @@ svg > #background
 	stroke-width: 2px;
 	stroke-dasharray: 0px;
 }
+
+.component.pinned.high
+{
+	fill: pink;
+}
+
+.component.pinned.low
+{
+	fill: lightblue;
+}

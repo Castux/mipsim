@@ -13,6 +13,7 @@ end
 function Simulator:setup()
 
 	self.values = {}
+	self.pins = {}
 	self.needUpdate = {}
 
 	for comp in pairs(self.geom.components) do
@@ -139,15 +140,25 @@ function Simulator:computeGroupValue(group)
 	local value = "floating"
 
 	for comp in pairs(group) do
-		if comp.type == "ground" then
+		if comp.type == "ground" or self.pins[comp] == "low" then
 			return "low"
 
-		elseif comp.type == "power" then
+		elseif comp.type == "power" or self.pins[comp] == "high" then
 			value = "high"
 		end
 	end
 
 	return value
+end
+
+function Simulator:setPin(comp, value)
+
+	assert(comp.type == "wire")
+
+	self.pins[comp] = value
+	table.insert(self.needUpdate, comp)
+
+	self:update()
 end
 
 return Simulator

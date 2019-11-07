@@ -342,6 +342,16 @@ function Canvas:onComponentUpdated(comp)
 		svg = group
 	end
 
+	-- Pinnable wires
+
+	if comp.type == "wire" then
+		svg.onclick = function()
+			if not self.editMode then
+				self:togglePin(comp)
+			end
+		end
+	end
+
 	-- Add to canvas!
 
 	local layer
@@ -454,6 +464,26 @@ end
 function Canvas:onValueChanged(comp, value)
 	self:resetValue(comp)
 	self.svgComponents[comp].classList:add(value)
+end
+
+function Canvas:togglePin(comp)
+	local pin = self.simulator.pins[comp]
+
+	if not pin then
+		pin = "high"
+	elseif pin == "high" then
+		pin = "low"
+	else
+		pin = nil
+	end
+
+	self.simulator:setPin(comp, pin)
+
+	if pin then
+		self.svgComponents[comp].classList:add "pinned"
+	else
+		self.svgComponents[comp].classList:remove "pinned"
+	end
 end
 
 return Canvas
