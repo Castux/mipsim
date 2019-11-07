@@ -436,10 +436,18 @@ function Geom:updateComponents()
 		end
 	end
 
-	-- Update connections
+	-- Update connections, bridges last, since they add themselves to others
 
 	for comp in pairs(self.dirtyComponents) do
-		self:updateConnections(comp)
+		if comp.type ~= "bridge" then
+			self:updateConnections(comp)
+		end
+	end
+
+	for comp in pairs(self.dirtyComponents) do
+		if comp.type == "bridge" then
+			self:updateConnections(comp)
+		end
 	end
 
 	-- Extra pass for transistors
