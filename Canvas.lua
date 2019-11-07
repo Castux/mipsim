@@ -493,15 +493,21 @@ function Canvas:togglePin(comp)
 end
 
 function Canvas:startSimulation()
-	self.simulator = Simulator(self.geom, function(comp, value)
+	self.simulator = Simulator(self.geom)
+
+	self.simulator.valueChangedCB = function(comp, value)
 		self:onValueChanged(comp, value)
-	end)
+	end
+
+	self.simulator:setup()
 end
 
 function Canvas:stopSimulation()
 	for comp,svg in pairs(self.svgComponents) do
 		self:resetValue(comp)
 	end
+
+	self.simulator = nil
 end
 
 return Canvas

@@ -5,9 +5,7 @@ local Simulator = class()
 function Simulator:init(geom, cb)
 
 	self.geom = geom
-	self.valueChangedCB = cb
-
-	self:setup()
+	self.valueChangedCB = nil
 end
 
 function Simulator:setup()
