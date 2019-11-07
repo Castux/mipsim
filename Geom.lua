@@ -367,11 +367,10 @@ function Geom:deleteComponent(comp)
 	end
 
 	if self.componentDestroyedCB then
-		 self.componentDestroyedCB(comp)
+		self.componentDestroyedCB(comp)
 	end
 
 	self.components[comp] = nil
-
 end
 
 function Geom:updateComponents()
@@ -422,6 +421,14 @@ function Geom:updateComponents()
 		end
 	end
 
+	-- Destroyed components shouldn't be treated as dirty
+
+	for comp in pairs(self.dirtyComponents) do
+		if not self.components[comp] then
+			self.dirtyComponents[comp] = nil
+		end
+	end
+
 	-- Update connections
 
 	for comp in pairs(self.dirtyComponents) do
@@ -436,8 +443,6 @@ function Geom:updateComponents()
 		end
 	end
 
-	self.dirtyComponents = {}
-
 	-- Cleanup
 
 	for comp in pairs(newComponents) do
@@ -446,6 +451,7 @@ function Geom:updateComponents()
 		end
 	end
 
+	self.dirtyComponents = {}
 end
 
 return Geom
