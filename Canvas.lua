@@ -89,6 +89,7 @@ function Canvas:loadFile(file)
 	local reader = js.new(js.global.FileReader)
 	reader.onloadend = function()
 		self.geom:loadTiles(reader.result)
+		self:startSimulation()
 	end
 
 	reader:readAsText(file)
@@ -393,13 +394,9 @@ function Canvas:toggleEdit()
 		self.clipboard = nil
 		self.selectRect.style.display = "none"
 
-		self.simulator = Simulator(self.geom, function(comp, value)
-			self:onValueChanged(comp, value)
-		end)
+		self:startSimulation()
 	else
-		for comp,svg in pairs(self.svgComponents) do
-			self:resetValue(comp)
-		end
+		self:stopSimulation()
 	end
 end
 
@@ -483,6 +480,18 @@ function Canvas:togglePin(comp)
 		self.svgComponents[comp].classList:add "pinned"
 	else
 		self.svgComponents[comp].classList:remove "pinned"
+	end
+end
+
+function Canvas:startSimulation()
+	self.simulator = Simulator(self.geom, function(comp, value)
+		self:onValueChanged(comp, value)
+	end)
+end
+
+function Canvas:stopSimulation()
+	for comp,svg in pairs(self.svgComponents) do
+		self:resetValue(comp)
 	end
 end
 
