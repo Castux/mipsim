@@ -15,7 +15,10 @@ function Simulator:setup()
 	self.needUpdate = {}
 
 	for comp in pairs(self.geom.components) do
-		table.insert(self.needUpdate, comp)
+
+		if comp.type == "power" or comp.type == "ground" then
+			table.insert(self.needUpdate, comp)
+		end
 	end
 
 	self:update()
