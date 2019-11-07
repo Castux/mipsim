@@ -75,21 +75,21 @@ svg > #background
 	stroke-dasharray: 2px;
 }
 
-.component.high
+.component.high, .high > .component
 {
 	stroke: pink;
 	stroke-width: 2px;
 	stroke-dasharray: 0px;
 }
 
-.component.low
+.component.low, .low > .component
 {
 	stroke: lightblue;
 	stroke-width: 2px;
 	stroke-dasharray: 0px;
 }
 
-.component.unstable
+.component.unstable, .unstable > .component
 {
 	stroke: brown;
 	stroke-width: 2px;

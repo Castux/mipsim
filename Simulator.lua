@@ -47,7 +47,7 @@ function Simulator:update()
 			-- Notify
 
 			if prev ~= value and self.valueChangedCB then
-				self.valueChangedCB(comp, value)
+				self.valueChangedCB(c, value)
 			end
 
 			-- Detect circular dependencies
@@ -117,18 +117,13 @@ function Simulator:findGroup(comp)
 	while #queue > 0 do
 
 		local current = table.remove(queue)
-
-		if group[current] then
-			goto skip
-		end
-
 		group[current] = true
 
-		for _,other in ipairs(self:connectedComponents(comp)) do
-			table.insert(queue, other)
+		for _,other in ipairs(self:connectedComponents(current)) do
+			if not group[other] then
+				table.insert(queue, other)
+			end
 		end
-
-		::skip::
 	end
 
 	return group
