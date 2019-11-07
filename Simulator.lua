@@ -34,10 +34,6 @@ function Simulator:update()
 
 		local comp = table.remove(self.needUpdate)
 
-		if done[comp] then
-			goto skip
-		end
-
 		local group = self:findGroup(comp)
 		local value = self:computeGroupValue(group)
 
@@ -48,9 +44,11 @@ function Simulator:update()
 			local prev = self.values[c]
 			self.values[c] = value
 
-			-- Detect circular dependencies
+			-- Detect circular dependencies: oscillating transistors
 
-			if done[c] and oppositeValues(prev, value) then
+			if c.type == "transistor" and
+				done[c] and
+				oppositeValues(prev, value) then
 				self.values[c] = "unstable"
 			end
 
