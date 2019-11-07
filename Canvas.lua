@@ -456,11 +456,20 @@ function Canvas:resetValue(comp)
 	svg.classList:remove "high"
 	svg.classList:remove "unstable"
 	svg.classList:remove "floating"
+	svg.classList:remove "pinned"
 end
 
 function Canvas:onValueChanged(comp, value)
 	self:resetValue(comp)
-	self.svgComponents[comp].classList:add(value)
+
+	local svg = self.svgComponents[comp]
+	if svg then
+		svg.classList:add(value)
+
+		if self.simulator.pins[comp] then
+			svg.classList:add "pinned"
+		end
+	end
 end
 
 function Canvas:togglePin(comp)
