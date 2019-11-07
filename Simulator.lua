@@ -22,50 +22,53 @@ function Simulator:setup()
 end
 
 local function oppositeValues(a,b)
-	return (a == "high" and b == "low") or
-		(a == "low" and b == "high")
+	return (a == "high" and b ~= "high") or
+		(a ~= "high" and b == "high")
 end
 
-function Simulator:update(firstComp)
+function Simulator:update(comp, parentTransistors)
 
-	local done = {}
-	local queue = {firstComp}
+	parentTransistors = parentTransistors or {}
 
-	while #queue > 0 do
+	local group = self:findGroup(comp)
+	local newVal = self:computeGroupValue(group)
 
-		local comp = table.remove(queue)
+	-- Cycle detection
 
-		local group = self:findGroup(comp)
-		local value = self:computeGroupValue(group)
+	for c in pairs(group) do
+		if parentTransistors[c] and oppositeValues(self.values[c], newVal) then
+			newVal = "unstable"
+			break
+		end
+	end
 
-		-- Update values
+	-- Update values
 
-		for c in pairs(group) do
+	for c in pairs(group) do
 
-			local prev = self.values[c]
-			local newVal = value
+		local prev = self.values[c]
 
-			-- Detect circular dependencies: oscillating transistors
+		-- Change it
 
-			if done[c] and newVal ~= prev and c.type == "transistor" then
-				newVal = "unstable"
+		self.values[c] = newVal
+
+		if prev ~= newVal and self.valueChangedCB then
+			self.valueChangedCB(c, newVal)
+		end
+
+		-- Transistors that switch can modify other groups
+
+		if newVal ~= "unstable" and c.type == "transistor" and oppositeValues(prev, newVal) then
+
+			parentTransistors[c] = true
+
+			self:update(c.sd1, parentTransistors)
+
+			if newVal ~= "high" then
+				self:update(c.sd2, parentTransistors)
 			end
 
-			-- Notify
-
-			if prev ~= newVal and self.valueChangedCB then
-				self.valueChangedCB(c, newVal)
-			end
-
-			-- Transistors that switch can modify other groups
-
-			if c.type == "transistor" and prev ~= newVal and not done[c] then
-				table.insert(queue, c.sd1)
-				table.insert(queue, c.sd2)
-			end
-
-			done[c] = true
-			self.values[c] = newVal
+			parentTransistors[c] = false
 		end
 	end
 end
