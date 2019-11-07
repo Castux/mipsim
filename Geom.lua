@@ -75,7 +75,7 @@ end
 function Geom:clearTiles()
 
 	self.tiles = {}
-	
+
 	for comp in pairs(self.components) do
 		if self.componentDestroyedCB then
 			self.componentDestroyedCB(comp)
@@ -351,20 +351,27 @@ end
 
 function Geom:deleteComponent(comp)
 
+
 	for _,tile in ipairs(comp) do
 		self.dirtyTiles[tile] = true
+
+		if comp.type == "bridge" then
+			tile.bridgeComponent = nil
+		else
+			tile.component = nil
+		end
 	end
 
 	for conn in pairs(comp.connected) do
 		self.dirtyComponents[conn] = true
 	end
 
-	if self.componentDestroyedCB and not comp.destroyed then
+	if self.componentDestroyedCB then
 		 self.componentDestroyedCB(comp)
-		 comp.destroyed = true
 	end
 
 	self.components[comp] = nil
+
 end
 
 function Geom:updateComponents()
@@ -375,7 +382,8 @@ function Geom:updateComponents()
 	-- Normal components first
 
 	for tile in pairs(self.dirtyTiles) do
-		if not done[tile] and tile.type then
+		if not done[tile] and tile.type and not tile.component then
+
 			local comp = self:computeComponent(tile)
 			for _,tile in ipairs(comp) do
 				done[tile] = true
@@ -392,7 +400,7 @@ function Geom:updateComponents()
 	done = {}
 
 	for tile in pairs(self.dirtyTiles) do
-		if not done[tile] and tile.bridge then
+		if not done[tile] and tile.bridge and not tile.bridgeComponent then
 			local comp = self:computeComponent(tile, true)
 			for _,tile in ipairs(comp) do
 				done[tile] = true
