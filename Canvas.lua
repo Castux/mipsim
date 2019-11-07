@@ -473,6 +473,15 @@ function Canvas:onValueChanged(comp, value)
 	end
 end
 
+local function stepSimulation(wrap)
+
+	local res = wrap()
+
+	if res == "paused" then
+		js.global:setTimeout(function() stepSimulation(wrap) end, 400)
+	end
+end
+
 function Canvas:setPin(comp, val)
 	local old = self.simulator.pins[comp]
 
@@ -480,24 +489,35 @@ function Canvas:setPin(comp, val)
 		val = nil
 	end
 
-	self.simulator:setPin(comp, val)
-
 	if val then
 		self.svgComponents[comp].classList:add "pinned"
 	else
 		self.svgComponents[comp].classList:remove "pinned"
 	end
+
+	local wrap = coroutine.wrap(function()
+		self.simulator:setPin(comp, val)
+	end)
+
+	stepSimulation(wrap)
 end
 
 function Canvas:startSimulation()
 	self.simulator = Simulator(self.geom)
+	self.simulator.stepped = true
 
 	self.simulator.valueChangedCB = function(comp, value)
 		self:onValueChanged(comp, value)
 	end
 
-	self.simulator:setup()
+	local wrap = coroutine.wrap(function()
+		self.simulator:setup("stepped")
+	end)
+
+	stepSimulation(wrap)
 end
+
+
 
 function Canvas:stopSimulation()
 	for comp,svg in pairs(self.svgComponents) do

@@ -2,10 +2,11 @@ local class = require "class"
 
 local Simulator = class()
 
-function Simulator:init(geom, cb)
+function Simulator:init(geom)
 
 	self.geom = geom
 	self.valueChangedCB = nil
+	self.stepped = false
 end
 
 function Simulator:setup()
@@ -54,6 +55,10 @@ function Simulator:update(comp, parentTransistors)
 
 		if prev ~= newVal and self.valueChangedCB then
 			self.valueChangedCB(c, newVal)
+		end
+
+		if self.stepped then
+			coroutine.yield("paused")
 		end
 
 		-- Transistors that switch can modify other groups
