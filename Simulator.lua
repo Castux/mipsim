@@ -225,4 +225,36 @@ function Simulator:readNumber(name)
 	return value
 end
 
+function Simulator:setNumber(name, number)
+
+	local wires = self.numbers[name]
+	if not wires then
+		return
+	end
+
+	if not number then
+		for i = 0,#wires do
+			if wires[i] then
+				self:setPin(wires[i], nil)
+			end
+		end
+		return
+	end
+
+	local bitIndex = 0
+	for i = 0,#wires do
+
+		local bit = number & 1
+		local value = bit == 1 and "high" or "low"
+		local wire = wires[i]
+
+		if wire then
+			self:setPin(wire, value)
+		end
+
+		number = number >> 1
+	end
+
+end
+
 return Simulator

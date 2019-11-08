@@ -52,6 +52,7 @@ function Canvas:init(id)
 	self.saveBox = js.global.document:getElementById "saveBox"
 	self.simulationBox = js.global.document:getElementById "simulationBox"
 	self.simulationBoxValues = js.global.document:getElementById "simulationValues"
+	self.simulationInputs = js.global.document:getElementById "simulationInputs"
 
 	js.global.document.onkeydown = function(target, e)
 		if e.target == js.global.document.body then
@@ -621,6 +622,8 @@ end
 
 function Canvas:updateSimulationBox()
 
+	-- Values
+
 	local res = {}
 	for k,v in pairs(self.simulator.named) do
 		local val = self.simulator.values[v]
@@ -635,6 +638,25 @@ function Canvas:updateSimulationBox()
 	res = table.concat(res, "</br>")
 
 	self.simulationBoxValues.innerHTML = res
+
+	-- Inputs
+
+	self.simulationInputs.innerHTML = ""
+
+	for k in pairs(self.simulator.numbers) do
+		if k:match("^in") then
+			local input = js.global.document:createElement "input"
+			input:setAttribute("type", "text")
+			input:setAttribute("placeholder", k)
+
+			input.onchange = function()
+				self.simulator:setNumber(k, tonumber(input.value))
+			end
+
+			self.simulationInputs:appendChild(input)
+
+		end
+	end
 end
 
 return Canvas
