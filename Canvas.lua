@@ -174,9 +174,8 @@ function Canvas:onMouseUp()
 end
 
 function Canvas:deselect()
-
 	self.selection = nil
-	self.selectRect.classList:add("hidden")
+	self.selectRect.style.display = "none"
 end
 
 function Canvas:setTile(x,y,type)
