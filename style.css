@@ -155,6 +155,7 @@ body
 
 .label
 {
-	font-size: 32px;
+	font-size: 28px;
 	user-select: none;
+	font-family: sans-serif;
 }
