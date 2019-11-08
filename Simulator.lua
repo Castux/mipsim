@@ -86,12 +86,6 @@ function Simulator:update(startComp)
 			::skip::
 		end
 	end
-
-	for k,v in pairs(flipCounts) do
-		print(k,v)
-	end
-
-	print "DONE"
 end
 
 function Simulator:connectedComponents(comp)
