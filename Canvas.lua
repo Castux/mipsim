@@ -52,7 +52,7 @@ function Canvas:init(id)
 	self.saveBox = js.global.document:getElementById "saveBox"
 
 	js.global.document.onkeydown = function(target, e)
-		if e.target ~= savePath then
+		if e.target == js.global.document.body then
 			self:handleKeyPress(e.key)
 		end
 	end
@@ -71,6 +71,14 @@ function Canvas:init(id)
 
 	self.svg.oncontextmenu = function(t,e)
 		e:preventDefault()
+	end
+
+	self.labelP = js.global.document:getElementById "labelP"
+	self.labelP.style.display = "none"
+
+	self.labelInput = js.global.document:getElementById "labelInput"
+	self.labelInput.onchange = function(t,e)
+		self:editLabel(self.labelInput.value)
 	end
 end
 
@@ -153,6 +161,8 @@ function Canvas:onMouseMove(target, ev)
 
 		self.selection = {left, top, w, h}
 		self.selectRect.style.display = "initial"
+
+		self:updateLabelInput()
 	end
 end
 
@@ -176,6 +186,8 @@ end
 function Canvas:deselect()
 	self.selection = nil
 	self.selectRect.style.display = "none"
+
+	self:updateLabelInput()
 end
 
 function Canvas:setTile(x,y,type)
@@ -208,6 +220,7 @@ function Canvas:fill(type)
 	end
 
 	self.geom:updateComponents()
+	self:updateLabelInput()
 end
 
 function Canvas:zoom(factor)
@@ -303,10 +316,14 @@ function Canvas:onComponentUpdated(comp)
 
 	str = table.concat(str, " ")
 
+	local group = js.global.document:createElementNS(svgNS, "g")
+
 	local svg = js.global.document:createElementNS(svgNS, "path")
 	svg:setAttribute("d", str)
 	svg.classList:add("component")
 	svg.classList:add(comp.type)
+
+	group:appendChild(svg)
 
 	-- Transistor specials
 
@@ -316,9 +333,6 @@ function Canvas:onComponentUpdated(comp)
 			svg.classList:add "invalid"
 		else
 
-			local group = js.global.document:createElementNS(svgNS, "g")
-			group:appendChild(svg)
-
 			local ds = js.global.document:createElementNS(svgNS, "line")
 			ds:setAttribute("x1", (comp.sd1Tile.x + 0.5) * tileSize)
 			ds:setAttribute("y1", (comp.sd1Tile.y + 0.5) * tileSize)
@@ -327,16 +341,12 @@ function Canvas:onComponentUpdated(comp)
 			ds.classList:add "drain-source"
 
 			group:appendChild(ds)
-			svg = group
 		end
 	end
 
 	-- Bridge endpoints
 
 	if comp.type == "bridge" then
-
-		local group = js.global.document:createElementNS(svgNS, "g")
-		group:appendChild(svg)
 
 		for _,tile in ipairs(comp.endpoints) do
 			local ep = js.global.document:createElementNS(svgNS, "circle")
@@ -347,8 +357,6 @@ function Canvas:onComponentUpdated(comp)
 
 			group:appendChild(ep)
 		end
-
-		svg = group
 	end
 
 	-- Pinnable wires
@@ -358,6 +366,17 @@ function Canvas:onComponentUpdated(comp)
 			if not self.editMode then
 				self:setPin(comp, e.button == 0 and "high" or "low")
 			end
+		end
+
+		local labelTile = self.geom:getComponentLabel(comp)
+		if labelTile then
+			local txt = js.global.document:createElementNS(svgNS, "text")
+			txt:setAttribute("class", "label")
+			txt:setAttribute("x", (labelTile.x + 0.5) * tileSize)
+			txt:setAttribute("y", (labelTile.y + 0.5) * tileSize)
+			txt.innerHTML = labelTile.label
+
+			group:appendChild(txt)
 		end
 	end
 
@@ -373,8 +392,8 @@ function Canvas:onComponentUpdated(comp)
 		layer = self.componentsLayer
 	end
 
-	layer:appendChild(svg)
-	self.svgComponents[comp] = svg
+	layer:appendChild(group)
+	self.svgComponents[comp] = group
 
 	-- Fun stuff
 
@@ -549,14 +568,48 @@ function Canvas:startSimulation(stepped)
 	stepSimulation(wrap)
 end
 
-
-
 function Canvas:stopSimulation()
 	for comp,svg in pairs(self.svgComponents) do
 		self:resetValue(comp)
 	end
 
 	self.simulator = nil
+end
+
+
+function Canvas:updateLabelInput()
+
+	local show = false
+	local text = ""
+
+	if self.selection then
+		local left,top,w,h = table.unpack(self.selection)
+		local tile = self.geom:getTile(left,top)
+
+		if tile and tile.type =="wire" and w == 1 and h == 1 then
+			show = true
+			text = tile.label or ""
+		end
+	end
+
+	self.labelP.style.display = show and "initial" or "none"
+	if show then
+		self.labelInput.value = text
+	end
+end
+
+function Canvas:editLabel(value)
+	assert(self.selection)
+
+	local left,top,w,h = table.unpack(self.selection)
+	local tile = self.geom:getTile(left,top)
+
+	assert(tile and tile.type == "wire")
+
+	if value == "" then value = nil end
+
+	self.geom:setLabel(tile, value)
+	self:onComponentUpdated(tile.component)
 end
 
 return Canvas

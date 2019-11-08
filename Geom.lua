@@ -44,6 +44,10 @@ function Geom:setTile(x,y,type)
 		tile.type = type
 	end
 
+	if tile.label and tile.type ~= "wire" then
+		tile.label = nil
+	end
+
 	self:setDirtyTile(tile, true)
 end
 
@@ -130,6 +134,10 @@ function Geom:dumpTiles()
 			table.insert(parts, "bridge=true")
 		end
 
+		if tile.label then
+			table.insert(parts, string.format("label=%q", tile.label))
+		end
+
 		table.insert(res, "{" .. table.concat(parts, ",") .. "}")
 	end
 
@@ -152,6 +160,10 @@ function Geom:loadTiles(str)
 		end
 		if t.bridge then
 			self:setTile(t.x, t.y, "bridge")
+		end
+		if t.label then
+			local created = self:getTile(t.x, t.y)
+			self:setLabel(created, t.label)
 		end
 	end
 
@@ -467,6 +479,24 @@ function Geom:updateComponents()
 	end
 
 	self.dirtyComponents = {}
+end
+
+function Geom:setLabel(tile, value)
+
+	assert(tile.type == "wire")
+	tile.label = value
+
+end
+
+function Geom:getComponentLabel(comp)
+
+	for _,tile in ipairs(comp) do
+		if tile.label then
+			return tile
+		end
+	end
+
+	return nil
 end
 
 return Geom

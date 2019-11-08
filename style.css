@@ -95,48 +95,53 @@ body
 	fill-opacity: 0.5;
 }
 
-.component.connected, .connected > .component
+.connected > .component
 {
 	stroke: lightgreen;
 	stroke-width: 2px;
 	stroke-dasharray: 2px;
 }
 
-.component.high, .high > .component
+.high > .component
 {
 	stroke: pink;
 }
 
-.component.low, .low > .component
+.low > .component
 {
 	stroke: lightblue;
 }
 
-.component.unstable, .unstable > .component
+.unstable > .component
 {
 	stroke: brown;
 	stroke-width: 2px;
 	stroke-dasharray: 0px;
 }
 
-.wire.high
+.high > .wire
 {
 	fill: pink;
 }
 
-.wire.low
+.low > .wire
 {
 	fill: lightblue;
 }
 
-.component.pinned.high
+.high.pinned > .wire
 {
 	stroke: #ff7d7d;
 	stroke-width: 2px;
 }
 
-.component.pinned.low
+.low.pinned > .wire
 {
 	stroke: #6d6dff;
 	stroke-width: 2px;
+}
+
+.label
+{
+	font-size: 32px;
 }
