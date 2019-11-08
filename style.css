@@ -6,6 +6,11 @@
 	stroke-dasharray: 1px;
 }
 
+#center-dot
+{
+	fill: lightgrey;
+}
+
 svg > #background
 {
 	width: 100%;

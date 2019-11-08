@@ -12,6 +12,7 @@
 		<div id="canvasContainer">
 			<svg id="canvas" width="800" height="600" viewBox="0 0 400 300">
 				<rect id="background" />
+				<circle id="center-dot" r="5" cx="0" cy="0" />
 				<g id="componentsLayer" />
 				<g id="transistorsLayer" />
 				<g id="bridgesLayer" />
@@ -23,6 +24,8 @@
 			<button id="saveButton">Save</button>
 			<p>Load:<p>
 			<input type="file" id="loadButton" />
+			<p>Load to clipboard:<p>
+			<input type="file" id="loadToClipboardButton" />
 		</div>
 	</body>
 

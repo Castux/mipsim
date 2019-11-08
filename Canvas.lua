@@ -63,6 +63,11 @@ function Canvas:init(id)
 		self:loadFile(e.target.files[0])
 	end
 
+	local loadToClipboardButton = js.global.document:getElementById "loadToClipboardButton"
+	loadToClipboardButton.onchange = function(target, e)
+		self:loadFile(e.target.files[0], true)
+	end
+
 	self:toggleEdit()
 
 	self.svg.oncontextmenu = function(t,e)
@@ -84,7 +89,7 @@ function Canvas:downloadFile(path, content)
 	js.global.document.body:removeChild(element)
 end
 
-function Canvas:loadFile(file)
+function Canvas:loadFile(file, toClipboard)
 
 	if file == js.null then
 		return
@@ -92,7 +97,12 @@ function Canvas:loadFile(file)
 
 	local reader = js.new(js.global.FileReader)
 	reader.onloadend = function()
-		self.geom:loadTiles(reader.result)
+
+		if toClipboard then
+			self:loadToClipboard(reader.result)
+		else
+			self.geom:loadTiles(reader.result)
+		end
 	end
 
 	reader:readAsText(file)
@@ -437,6 +447,28 @@ function Canvas:editCut(copy)
 
 	self.clipboard = clipboard
 	self.geom:updateComponents()
+end
+
+function Canvas:loadToClipboard(str)
+	local loader = load("return " .. str)
+	if not loader then
+		print "Invalid tile dump"
+		return
+	end
+
+	local clipboard = {}
+
+	local tiles = loader()
+	for i,tile in ipairs(tiles) do
+
+		if tile.type then
+			table.insert(clipboard, {tile.x, tile.y, tile.type})
+		end
+		if tile.bridge then
+			table.insert(clipboard, {tile.x, tile.y, "bridge"})
+		end
+	end
+	self.clipboard = clipboard
 end
 
 function Canvas:editPaste()
