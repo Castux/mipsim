@@ -144,4 +144,5 @@ body
 .label
 {
 	font-size: 32px;
+	user-select: none;
 }
