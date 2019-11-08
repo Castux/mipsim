@@ -15,6 +15,12 @@ function Simulator:setup()
 	self.values = {}
 	self.pins = {}
 
+	self:getNamedComponents()
+
+	for comp in pairs(self.geom.components) do
+		self.values[comp] = "floating"
+	end
+
 	for comp in pairs(self.geom.components) do
 
 		if comp.type == "power" or comp.type == "ground" then
@@ -174,6 +180,20 @@ function Simulator:setPin(comp, value)
 
 	self.pins[comp] = value
 	self:update(comp)
+end
+
+function Simulator:getNamedComponents()
+
+	local named = {}
+
+	for comp in pairs(self.geom.components) do
+		local labelTile = self.geom:getComponentLabel(comp)
+		if labelTile then
+			named[labelTile.label] = comp
+		end
+	end
+
+	self.named = named
 end
 
 return Simulator

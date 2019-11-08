@@ -17,7 +17,8 @@
 				<g id="bridgesLayer" />
 			</svg>
 		</div>
-		<div id="saveBox">
+		<div id="saveBox" class="sideBox">
+			<h1>Editing</h1>
 			<p>w: wire, p: power, g: ground, t:transistor, b: bridge, B: remove bridge, backspace: delete, x: cut, c: copy, v: paste, e: toggle edit/simulate, E: simulate slowly</p>
 			<p id="labelP">Label: <input id="labelInput" type="text"></input></p>
 			<p>Save:<p>
@@ -27,6 +28,10 @@
 			<input type="file" id="loadButton" />
 			<p>Load to clipboard:<p>
 			<input type="file" id="loadToClipboardButton" />
+		</div>
+		<div id="simulationBox" class="sideBox">
+			<h1>Simulating</h1>
+			<p id="simulationValues"></p>
 		</div>
 	</body>
 

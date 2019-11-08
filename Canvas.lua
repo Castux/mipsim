@@ -50,6 +50,8 @@ function Canvas:init(id)
 	end
 
 	self.saveBox = js.global.document:getElementById "saveBox"
+	self.simulationBox = js.global.document:getElementById "simulationBox"
+	self.simulationBoxValues = js.global.document:getElementById "simulationValues"
 
 	js.global.document.onkeydown = function(target, e)
 		if e.target == js.global.document.body then
@@ -419,6 +421,7 @@ function Canvas:toggleEdit(steps)
 	self.editMode = not self.editMode
 
 	self.saveBox.style.display = self.editMode and "initial" or "none"
+	self.simulationBox.style.display = (not self.editMode) and "initial" or "none"
 
 	if not self.editMode then
 		self.selection = nil
@@ -521,6 +524,8 @@ function Canvas:onValueChanged(comp, value)
 	if self.simulator.pins[comp] then
 		svg.classList:add "pinned"
 	end
+
+	self:updateSimulationBox()
 end
 
 local function stepSimulation(wrap)
@@ -566,6 +571,8 @@ function Canvas:startSimulation(stepped)
 	end)
 
 	stepSimulation(wrap)
+
+	self:updateSimulationBox()
 end
 
 function Canvas:stopSimulation()
@@ -610,6 +617,19 @@ function Canvas:editLabel(value)
 
 	self.geom:setLabel(tile, value)
 	self:onComponentUpdated(tile.component)
+end
+
+function Canvas:updateSimulationBox()
+
+	local res = {}
+	for k,v in pairs(self.simulator.named) do
+		local val = self.simulator.values[v]
+		table.insert(res, k .. ": " .. val)
+	end
+
+	res = table.concat(res, "</br>")
+
+	self.simulationBoxValues.innerHTML = res
 end
 
 return Canvas
