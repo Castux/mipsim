@@ -1,3 +1,8 @@
+body
+{
+	margin: 0;
+}
+
 .selectRect
 {
 	fill: none;
@@ -11,11 +16,29 @@
 	fill: lightgrey;
 }
 
-svg > #background
+#canvasContainer
+{
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	left: 0;
+	top: 0;
+}
+
+#canvas
 {
 	width: 100%;
 	height: 100%;
-	fill: #ffffe1;
+}
+
+#saveBox
+{
+	position: absolute;
+	left: 20px;
+	bottom: 20px;
+	border: 2px solid black;
+	background-color: white;
+	padding: 10px;
 }
 
 .component
