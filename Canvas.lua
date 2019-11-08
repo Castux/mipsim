@@ -20,7 +20,6 @@ function Canvas:init(id)
 	end
 	self.svg.onmouseup = function() self:onMouseUp() end
 
-	self.background = self.svg:getElementById "background"
 	self.componentsLayer = self.svg:getElementById "componentsLayer"
 	self.transistorsLayer = self.svg:getElementById "transistorsLayer"
 	self.bridgesLayer = self.svg:getElementById "bridgesLayer"
@@ -233,11 +232,6 @@ function Canvas:zoom(factor)
 		newminx, newminy, neww, newh)
 
 	self.svg:setAttribute("viewBox", newBox)
-
-	self.background:setAttribute("width", neww)
-	self.background:setAttribute("height", newh)
-	self.background:setAttribute("x", newminx)
-	self.background:setAttribute("y", newminy)
 end
 
 function Canvas:handleKeyPress(key)
