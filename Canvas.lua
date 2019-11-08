@@ -534,7 +534,7 @@ local function stepSimulation(wrap)
 	local res = wrap()
 
 	if res == "paused" then
-		js.global:setTimeout(function() stepSimulation(wrap) end, 300)
+		js.global:setTimeout(function() stepSimulation(wrap) end, 100)
 	end
 end
 
@@ -650,7 +650,10 @@ function Canvas:updateSimulationBox()
 			input:setAttribute("placeholder", k)
 
 			input.onchange = function()
-				self.simulator:setNumber(k, tonumber(input.value))
+				local wrap = coroutine.wrap(function()
+					self.simulator:setNumber(k, tonumber(input.value))
+				end)
+				stepSimulation(wrap)
 			end
 
 			self.simulationInputs:appendChild(input)
