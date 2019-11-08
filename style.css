@@ -33,12 +33,18 @@ body
 
 #saveBox
 {
+	max-width: 300px;
 	position: absolute;
-	left: 20px;
+	right: 20px;
 	bottom: 20px;
 	border: 2px solid black;
 	background-color: white;
 	padding: 10px;
+}
+
+#saveBox > p
+{
+	margin: 0 0 0.75em 0;
 }
 
 .component
