@@ -51,8 +51,12 @@ body
 {
 	font-size: 1.3em;
 	font-weight: bold;
+}
 
-	margin: 0 0 0.1em 0;
+.sideBox > h2
+{
+	font-size: 1em;
+	font-weight: bold;
 }
 
 .component
