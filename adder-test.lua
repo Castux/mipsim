@@ -15,6 +15,9 @@ for i = 0,15 do
 		sim:setNumber("in_a", i)
 		sim:setNumber("in_b", j)
 
-		print(i, "+", j, "=", sim:readNumber("out"))
+		local result = sim:readNumber("out")
+		local err = result % 16 ~= (i+j) % 16
+
+		print(i, "+", j, "=", result, err and "WRONG" or "")
 	end
 end
