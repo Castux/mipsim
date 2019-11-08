@@ -15,7 +15,7 @@ function Simulator:setup()
 	self.values = {}
 	self.pins = {}
 
-	self:getNamedComponents()
+	self:setupNamedComponents()
 
 	for comp in pairs(self.geom.components) do
 		self.values[comp] = "floating"
@@ -182,7 +182,7 @@ function Simulator:setPin(comp, value)
 	self:update(comp)
 end
 
-function Simulator:getNamedComponents()
+function Simulator:setupNamedComponents()
 
 	local named = {}
 
@@ -194,6 +194,35 @@ function Simulator:getNamedComponents()
 	end
 
 	self.named = named
+
+	local numbers = {}
+
+	for k,v in pairs(named) do
+		local base,bit = k:match("^(.*)_(%d+)")
+		if base and bit then
+			numbers[base] = numbers[base] or {}
+			numbers[base][tonumber(bit)] = v
+
+			named[k] = nil
+		end
+	end
+
+	self.numbers = numbers
+end
+
+function Simulator:readNumber(name)
+
+	if not self.numbers[name] then
+		return nil
+	end
+
+	local value = 0
+	for i,v in pairs(self.numbers[name]) do
+		local bit = self.values[v] == "high" and 1 or 0
+		value = value + bit * (1 << i)
+	end
+
+	return value
 end
 
 return Simulator

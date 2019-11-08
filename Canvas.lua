@@ -627,6 +627,11 @@ function Canvas:updateSimulationBox()
 		table.insert(res, k .. ": " .. val)
 	end
 
+	for k in pairs(self.simulator.numbers) do
+		local val = self.simulator:readNumber(k)
+		table.insert(res, k .. ": " .. val)
+	end
+
 	res = table.concat(res, "</br>")
 
 	self.simulationBoxValues.innerHTML = res
