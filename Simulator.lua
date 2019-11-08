@@ -1,4 +1,5 @@
 local class = require "class"
+local Queue = require("collections").Queue
 
 local Simulator = class()
 
@@ -27,60 +28,70 @@ local function oppositeValues(a,b)
 		(a ~= "high" and b == "high")
 end
 
-function Simulator:update(comp, parentTransistors)
+function Simulator:update(startComp)
 
-	parentTransistors = parentTransistors or {}
+	local queue = Queue()
+	queue:push(startComp)
 
-	local group = self:findGroup(comp)
-	local newVal = self:computeGroupValue(group)
+	local flipCounts = {}
 
-	-- Cycle detection
+	while not queue:empty() do
 
-	for c in pairs(group) do
-		if parentTransistors[c] and oppositeValues(self.values[c], newVal) then
-			newVal = "unstable"
-			break
-		end
-	end
+		local comp = queue:pop()
+		local group = self:findGroup(comp)
+		local newVal = self:computeGroupValue(group)
 
-	-- Update values
+		-- Cycle detection
 
-	for c in pairs(group) do
-
-		local prev = self.values[c]
-		if prev == "unstable" then
-			goto skip
+		for c in pairs(group) do
+			if (flipCounts[c] or 0) > 20 then
+				newVal = "unstable"
+				break
+			end
 		end
 
-		-- Change it
+		-- Update values
 
-		self.values[c] = newVal
+		for c in pairs(group) do
 
-		if prev ~= newVal and self.valueChangedCB then
-			self.valueChangedCB(c, newVal)
-		end
-
-		if self.stepped then
-			coroutine.yield("paused")
-		end
-
-		-- Transistors that switch can modify other groups
-
-		if newVal ~= "unstable" and c.type == "transistor" and oppositeValues(prev, newVal) then
-
-			parentTransistors[c] = true
-
-			self:update(c.sd1, parentTransistors)
-
-			if newVal ~= "high" then
-				self:update(c.sd2, parentTransistors)
+			local prev = self.values[c]
+			if prev == "unstable" then
+				goto skip
 			end
 
-			parentTransistors[c] = false
-		end
+			-- Change it
 
-		::skip::
+			self.values[c] = newVal
+
+			if prev ~= newVal and self.valueChangedCB then
+				self.valueChangedCB(c, newVal)
+			end
+
+			if self.stepped then
+				coroutine.yield("paused")
+			end
+
+			-- Transistors that switch can modify other groups
+
+			if newVal ~= "unstable" and c.type == "transistor" and oppositeValues(prev, newVal) then
+
+				flipCounts[c] = (flipCounts[c] or 0) + 1
+
+				queue:push(c.sd1)
+				if newVal ~= "high" then
+					queue:push(c.sd2)
+				end
+			end
+
+			::skip::
+		end
 	end
+
+	for k,v in pairs(flipCounts) do
+		print(k,v)
+	end
+
+	print "DONE"
 end
 
 function Simulator:connectedComponents(comp)
