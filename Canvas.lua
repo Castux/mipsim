@@ -281,7 +281,10 @@ function Canvas:handleKeyPress(key)
 			self:editCut("copy")
 		elseif key == "v" then
 			self:editPaste()
-
+		elseif key == "m" then
+			self:editMirror(false)
+		elseif key == "M" then
+			self:editMirror(true)
 		end
 	end
 end
@@ -503,6 +506,23 @@ function Canvas:editPaste()
 	end
 
 	self.geom:updateComponents()
+end
+
+function Canvas:editMirror(vertical)
+
+	self:editCut()
+
+	local left,top,w,h = table.unpack(self.selection)
+
+	for _,t in ipairs(self.clipboard) do
+		if vertical then
+			t[1] = w - t[1] - 1
+		else
+			t[2] = h - t[2] - 1
+		end
+	end
+
+	self:editPaste()
 end
 
 function Canvas:resetValue(comp)
