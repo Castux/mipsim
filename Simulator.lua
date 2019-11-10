@@ -175,6 +175,10 @@ function Simulator:computeGroupValue(group)
 end
 
 function Simulator:setPin(comp, value)
+	
+	if type(comp) == "string" then
+		comp = self.named[comp]
+	end
 
 	assert(comp.type == "wire")
 
