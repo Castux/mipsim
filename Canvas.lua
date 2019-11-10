@@ -294,9 +294,9 @@ function Canvas:handleKeyPress(key)
 		elseif key == "v" then
 			self:editPaste()
 		elseif key == "m" then
-			self:editMirror(false)
-		elseif key == "M" then
 			self:editMirror(true)
+		elseif key == "M" then
+			self:editMirror(false)
 		elseif key == "r" then
 			self:editRotate()
 		end
