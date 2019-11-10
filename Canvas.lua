@@ -157,16 +157,28 @@ function Canvas:onMouseMove(target, ev)
 		local w = math.abs(self.dragStartX - self.hoverX) + 1
 		local h = math.abs(self.dragStartY - self.hoverY) + 1
 
-		self.selectRect:setAttribute("x", left * tileSize)
-		self.selectRect:setAttribute("y", top * tileSize)
-		self.selectRect:setAttribute("width", w * tileSize)
-		self.selectRect:setAttribute("height", h * tileSize)
-
 		self.selection = {left, top, w, h}
-		self.selectRect.style.display = "initial"
+		self:updateSelectRect()
 
 		self:updateLabelInput()
 	end
+end
+
+function Canvas:updateSelectRect()
+
+	if not self.selection then
+		self.selectRect.style.display = "none"
+		return
+	end
+
+	self.selectRect.style.display = "initial"
+
+	local left,top,w,h = table.unpack(self.selection)
+
+	self.selectRect:setAttribute("x", left * tileSize)
+	self.selectRect:setAttribute("y", top * tileSize)
+	self.selectRect:setAttribute("width", w * tileSize)
+	self.selectRect:setAttribute("height", h * tileSize)
 end
 
 function Canvas:onMouseDown(target, ev)
@@ -285,6 +297,8 @@ function Canvas:handleKeyPress(key)
 			self:editMirror(false)
 		elseif key == "M" then
 			self:editMirror(true)
+		elseif key == "r" then
+			self:editRotate()
 		end
 	end
 end
@@ -429,8 +443,9 @@ function Canvas:toggleEdit(steps)
 
 	if not self.editMode then
 		self.selection = nil
+		self:updateSelectRect()
+
 		self.clipboard = nil
-		self.selectRect.style.display = "none"
 
 		self:startSimulation(steps)
 	else
@@ -523,6 +538,24 @@ function Canvas:editMirror(vertical)
 	end
 
 	self:editPaste()
+end
+
+function Canvas:editRotate()
+
+	self:editCut()
+
+	local left,top,w,h = table.unpack(self.selection)
+	local cx = w // 2
+	local cy = h // 2
+
+	for _,t in ipairs(self.clipboard) do
+		t[1], t[2] = -(t[2] - cy) + cx, (t[1] - cx) + cy
+	end
+
+	self:editPaste()
+
+	self.selection = {left - h + 1 + cx + cy, top - cx + cy, h, w}
+	self:updateSelectRect()
 end
 
 function Canvas:resetValue(comp)
