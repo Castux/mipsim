@@ -141,7 +141,7 @@ function Geom:dumpTiles()
 		table.insert(res, "{" .. table.concat(parts, ",") .. "}")
 	end
 
-	return "{" .. table.concat(res, ",") .. "}"
+	return "{" .. table.concat(res, ",\n") .. "}"
 end
 
 function Geom:loadTiles(str)
