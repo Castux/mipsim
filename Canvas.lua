@@ -542,6 +542,13 @@ function Canvas:editPaste()
 
 	local left,top,w,h = table.unpack(self.selection)
 
+	for i = left, left + w - 1 do
+		for j = top, top + h - 1 do
+			self:resetTile(i, j)
+			self:resetTile(i, j, "bridge")
+		end
+	end
+
 	for _,tile in ipairs(self.clipboard) do
 		self:setTile(tile[1] + left, tile[2] + top, tile[3])
 	end
