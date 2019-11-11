@@ -15,7 +15,6 @@ function Geom:init()
 	self.componentUpdatedCB = nil
 	self.componentDestroyedCB = nil
 
-
 	-- Live update
 
 	self.dirtyTiles = {}		-- need new component
@@ -93,11 +92,9 @@ function Geom:setDirtyTile(tile, addNeighbours)
 
 	if tile.component then
 		self:deleteComponent(tile.component)
-		assert(not tile.component)
 	end
 	if tile.bridgeComponent then
 		self:deleteComponent(tile.bridgeComponent)
-		assert(not tile.bridgeComponent)
 	end
 
 	if addNeighbours then
@@ -326,12 +323,6 @@ function Geom:updateConnections(comp)
 			comp.connected[tile.component] = true
 		end
 	end
-
-	-- Extra pass for transistors
-
-	if comp.type == "transistor" then
-		self:checkTransistor(comp)
-	end
 end
 
 function Geom:findStraightLine(t)
@@ -398,15 +389,14 @@ end
 
 function Geom:deleteComponent(comp)
 
+
 	for _,tile in ipairs(comp) do
 		self.dirtyTiles[tile] = true
 
-		if tile.bridgeComponent == comp then
+		if comp.type == "bridge" then
 			tile.bridgeComponent = nil
-		elseif tile.component == comp then
-			tile.component = nil
 		else
-			error "Tile from component doesn't have component?"
+			tile.component = nil
 		end
 	end
 
@@ -423,34 +413,34 @@ end
 
 function Geom:updateComponents()
 
+	local done = {}
 	local newComponents = {}
 
 	-- Normal components first
 
 	for tile in pairs(self.dirtyTiles) do
-
-		if tile.component then
-			assert(newComponents[tile.component], "Dirty tile with old component")
-		end
-
-		if tile.type and not tile.component then
+		if not done[tile] and tile.type and not tile.component then
 
 			local comp = self:computeComponent(tile)
 			for _,tile in ipairs(comp) do
+				done[tile] = true
 				tile.component = comp
 			end
 			self.components[comp] = true
 			self.dirtyComponents[comp] = true
 			newComponents[comp] = true
 		end
+	end
 
-		if tile.bridgeComponent then
-			assert(newComponents[tile.bridgeComponent], "Dirty tile with old component")
-		end
+	-- Bridge components next
 
-		if tile.bridge and not tile.bridgeComponent then
+	done = {}
+
+	for tile in pairs(self.dirtyTiles) do
+		if not done[tile] and tile.bridge and not tile.bridgeComponent then
 			local comp = self:computeComponent(tile, true)
 			for _,tile in ipairs(comp) do
+				done[tile] = true
 				tile.bridgeComponent = comp
 			end
 			self.components[comp] = true
@@ -464,7 +454,9 @@ function Geom:updateComponents()
 	-- All tiles should have components!
 
 	for x,y,tile in self:iterTiles() do
-		assert(tile.component or tile.bridgeComponent, "Tile without component")
+		if not tile.component and not tile.bridgeComponent then
+			error "Tile without component"
+		end
 	end
 
 	-- Destroyed components shouldn't be treated as dirty
@@ -475,10 +467,26 @@ function Geom:updateComponents()
 		end
 	end
 
-	-- Update connections
+	-- Update connections, bridges last, since they add themselves to others
 
 	for comp in pairs(self.dirtyComponents) do
-		self:updateConnections(comp)
+		if comp.type ~= "bridge" then
+			self:updateConnections(comp)
+		end
+	end
+
+	for comp in pairs(self.dirtyComponents) do
+		if comp.type == "bridge" then
+			self:updateConnections(comp)
+		end
+	end
+
+	-- Extra pass for transistors
+
+	for comp in pairs(self.dirtyComponents) do
+		if comp.type == "transistor" then
+			self:checkTransistor(comp)
+		end
 	end
 
 	-- Cleanup
