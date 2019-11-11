@@ -73,11 +73,12 @@ Some of these operations might be done even if they are pointless, to reduce the
 - ALU: "arithmetic logic unit". Here, it only knows how to increment or decrement. It has a buffer on the outside to allow reading and writing to the same register.
 - IO port: connected to the outside world (the program bank and the memory bank)
 - Clock: from a single alternating input clock pin, counts 5 (?) phases, each with an up and down subphase. All operations happen on specific phases.
-- Operation decoder: it stores the current operation from the program, decodes it (byte to single wire), and feeds it into the big instruction selector, a big ROM that combines current op and current phase to indicate what state should be all switches in the processor
+- Operation decoder: it stores the current operation from the program, decodes it (byte to single wire), and feeds it into the big instruction selector, a big ROM that combines current op and current phase to indicate what state should be all switches in the processor. Special ops for initialization (wait for the clock's cycle to start) or end of program.
 
 Routing is done via a main 8 bits bus, that links registers, ALU, IO and op decoder. All these accesses are switchable. Operations should always switch on two accesses: one that is read, and one that is written to.
 
-The ALU is always connected to the output of the registers (no point in having an extra switch).  
+The ALU is always connected to the output of the registers (no point in having an extra switch). If it seems that ALU only writes to registers, it could be kept off the main bus (although that still requires a switch).
+
 
 ## Switches at the output of op decoder
 
