@@ -66,11 +66,8 @@ function Geom:resetTile(x,y,type)
 		tile.type = nil
 	end
 
-	local deleted = false
-
 	if not tile.type and not tile.bridge then
 		self.tiles[x][y] = nil
-		deleted = true
 	end
 
 	self:setDirtyTile(tile, true)
@@ -267,21 +264,34 @@ function Geom:endpoints(comp)
 	local result = {}
 
 	for _,tile in ipairs(comp) do
-		if tile.type == "wire" then
-			local count = 0
-			for neigh in self:neighbours(tile) do
-				if neigh.bridgeComponent == comp then
-					count = count + 1
-				end
-			end
-
-			if count == 1 then
-				table.insert(result, tile)
-			end
+		if self:isEndpoint(tile) then
+			table.insert(result, tile)
 		end
 	end
 
 	return result
+end
+
+function Geom:isEndpoint(tile)
+
+	if tile.type ~= "wire" then
+		return false
+	end
+
+	if not tile.bridge then
+		return false
+	end
+
+	local count = 0
+	for neigh in self:neighbours(tile) do
+		if neigh.bridge then
+			count = count + 1
+		end
+
+		if count > 1 then break end
+	end
+
+	return count == 1
 end
 
 function Geom:updateConnections(comp)
@@ -296,6 +306,14 @@ function Geom:updateConnections(comp)
 			comp.connected[n.component] = true
 		end
 
+		if comp.type == "wire" then
+			for _,tile in ipairs(comp) do
+				if self:isEndpoint(tile) then
+					comp.connected[tile.bridgeComponent] = true
+				end
+			end
+		end
+
 	-- Bridge components
 
 	else
@@ -303,7 +321,6 @@ function Geom:updateConnections(comp)
 
 		for _,tile in ipairs(comp.endpoints) do
 			comp.connected[tile.component] = true
-			tile.component.connected[comp] = true
 		end
 	end
 end
