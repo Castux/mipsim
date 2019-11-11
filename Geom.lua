@@ -144,17 +144,19 @@ function Geom:dumpTiles()
 	return "{" .. table.concat(res, ",\n") .. "}"
 end
 
-function Geom:loadTiles(str)
-
-	local loader = load("return " .. str)
-	if not loader then
-		print "Invalid tile dump"
-	end
+function Geom:loadTiles(tiles)
 
 	self:clearTiles()
-	local newTiles = loader()
 
-	for _,t in ipairs(newTiles) do
+	if type(tiles) == "string" then
+		local loader = load("return " .. tiles)
+		if not loader then
+			print "Invalid tile dump"
+		end
+		tiles = loader()
+	end
+
+	for _,t in ipairs(tiles) do
 		if t.type then
 			self:setTile(t.x, t.y, t.type)
 		end

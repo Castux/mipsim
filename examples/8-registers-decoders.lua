@@ -1,3 +1,5 @@
+return
+
 {{x=0,y=9,type="wire"},
 {x=0,y=12,type="wire"},
 {x=0,y=23,type="wire"},
