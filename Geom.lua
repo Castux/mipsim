@@ -398,12 +398,16 @@ end
 
 function Geom:deleteComponent(comp)
 
-
 	for _,tile in ipairs(comp) do
 		self.dirtyTiles[tile] = true
 
-		tile.bridgeComponent = nil
-		tile.component = nil
+		if tile.bridgeComponent == comp then
+			tile.bridgeComponent = nil
+		elseif tile.component == comp then
+			tile.component = nil
+		else
+			error "Tile from component doesn't have component?"
+		end
 	end
 
 	for conn in pairs(comp.connected) do
