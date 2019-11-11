@@ -111,7 +111,7 @@ function Canvas:loadFile(file, toClipboard)
 		if toClipboard then
 			self:loadToClipboard(reader.result)
 		else
-			self.geom:loadTiles(reader.result)
+			self:loadTiles(reader.result)
 		end
 	end
 
@@ -456,6 +456,28 @@ function Canvas:toggleEdit(steps)
 		self:stopSimulation()
 	end
 end
+
+function Canvas:loadTiles(str)
+	self.geom:loadTiles(str)
+
+	local minx, miny = math.maxinteger, math.maxinteger
+	local maxx, maxy = math.mininteger, math.mininteger
+	for x,y,t in self.geom:iterTiles() do
+		minx = math.min(minx, x - 1)
+		miny = math.min(miny, y - 1)
+		maxx = math.max(maxx, x + 1)
+		maxy = math.max(maxy, y + 1)
+	end
+
+	local box = string.format("%f %f %f %f",
+		minx * tileSize,
+		miny * tileSize,
+		(maxx - minx + 1) * tileSize,
+		(maxy - miny + 1) * tileSize)
+
+	self.svg:setAttribute("viewBox", box)
+end
+
 
 function Canvas:editCut(copy)
 

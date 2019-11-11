@@ -5,7 +5,7 @@ local Simulator = require "Simulator"
 
 local function onTilesLoaded(txt, canvas)
 
-	canvas.geom:loadTiles(txt)
+	canvas:loadTiles(txt)
 	canvas:toggleEdit()
 
 	local sim = canvas.simulator
