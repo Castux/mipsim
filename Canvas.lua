@@ -299,6 +299,10 @@ function Canvas:handleKeyPress(key)
 			self:editMirror(false)
 		elseif key == "r" then
 			self:editRotate()
+		elseif key == "." then
+			for comp in pairs(self.geom.components) do
+				self.geom:updateConnections(comp)
+			end
 		end
 	end
 end
