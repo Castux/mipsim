@@ -2,12 +2,10 @@ local js = require "js"
 local Canvas = require "Canvas"
 local Simulator = require "Simulator"
 
-local function init()
 
-	local canvas = Canvas("canvas")
-	local tiles = require("examples.8-registers-decoders")
+local function onTilesLoaded(txt, canvas)
 
-	canvas.geom:loadTiles(tiles)
+	canvas.geom:loadTiles(txt)
 	canvas:toggleEdit()
 
 	local sim = canvas.simulator
@@ -64,6 +62,16 @@ local function init()
 	end
 
 	progress()
+end
+
+local function init()
+
+	local canvas = Canvas("canvas")
+
+	local req = js.new(js.global.XMLHttpRequest)
+	req:open('GET', "./examples/8-registers-decoders.txt")
+	req.onload = function() onTilesLoaded(req.responseText, canvas) end
+	req:send()
 end
 
 init()
