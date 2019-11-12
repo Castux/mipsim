@@ -8,7 +8,7 @@ local function op()
 	print("Testing opcode decoder...")
 
 	local geom = Geom()
-	local adder = io.open("part-opcode-to-op.txt"):read("a")
+	local adder = io.open("part-opdec.txt"):read("a")
 	geom:loadTiles(adder)
 	local sim = Simulator(geom)
 	sim:setup()
@@ -20,7 +20,9 @@ local function op()
 	for i,op in ipairs(ops) do
 
 		local b = string.byte(op)
-		sim:setNumber("opdec_in", b)
+		sim:setNumber("op_in", b)
+		sim:setPin("op_write", "high")
+		sim:setPin("op_write", "low")
 
 		for _,op2 in ipairs(ops) do
 			local out = sim:readValue("op_" .. op2)
