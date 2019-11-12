@@ -494,7 +494,7 @@ function Canvas:editCut(copy)
 			local tile = self.geom:getTile(i,j)
 
 			if tile and tile.type then
-				table.insert(clipboard, {tile.x - left, tile.y - top, tile.type})
+				table.insert(clipboard, {tile.x - left, tile.y - top, tile.type, tile.label})
 				if not copy then
 					self:resetTile(i,j)
 				end
@@ -526,7 +526,7 @@ function Canvas:loadToClipboard(str)
 	for i,tile in ipairs(tiles) do
 
 		if tile.type then
-			table.insert(clipboard, {tile.x, tile.y, tile.type})
+			table.insert(clipboard, {tile.x, tile.y, tile.type, tile.label})
 		end
 		if tile.bridge then
 			table.insert(clipboard, {tile.x, tile.y, "bridge"})
@@ -550,7 +550,11 @@ function Canvas:editPaste()
 	end
 
 	for _,tile in ipairs(self.clipboard) do
-		self:setTile(tile[1] + left, tile[2] + top, tile[3])
+		local x,y = tile[1] + left, tile[2] + top
+		self:setTile(x, y, tile[3])
+		if tile[4] then
+			self.geom:setLabel(self.geom:getTile(x,y), tile[4])
+		end
 	end
 
 	self.geom:updateComponents()
