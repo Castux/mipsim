@@ -13,6 +13,9 @@ local function clock()
 	local sim = Simulator(geom)
 	sim:setup()
 
+	sim:setPin("clock_reset", "high")
+	sim:setPin("clock_reset", "low")
+	
 	for i = 1,100 do
 
 		local before = sim:readNumber("phase")
