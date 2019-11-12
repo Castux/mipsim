@@ -8,7 +8,7 @@ local function registers()
 	print("Testing registers...")
 
 	local geom = Geom()
-	local adder = io.open("registers.txt"):read("a")
+	local adder = io.open("part-registers.txt"):read("a")
 	geom:loadTiles(adder)
 	local sim = Simulator(geom)
 	sim:setup()
