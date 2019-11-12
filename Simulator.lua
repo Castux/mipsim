@@ -175,7 +175,7 @@ function Simulator:computeGroupValue(group)
 end
 
 function Simulator:setPin(comp, value)
-	
+
 	if type(comp) == "string" then
 		comp = self.named[comp]
 	end
@@ -214,11 +214,15 @@ function Simulator:setupNamedComponents()
 	self.numbers = numbers
 end
 
+function Simulator:readValue(name)
+
+	assert(self.named[name], "No component called " .. name)
+	return self.values[self.named[name]]
+end
+
 function Simulator:readNumber(name)
 
-	if not self.numbers[name] then
-		return nil
-	end
+	assert(self.numbers[name], "No component number called " .. name)
 
 	local value = 0
 	for i,v in pairs(self.numbers[name]) do
