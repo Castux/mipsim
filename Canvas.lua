@@ -734,21 +734,19 @@ function Canvas:updateSimulationBox()
 	self.simulationInputs.innerHTML = ""
 
 	for k in pairs(self.simulator.numbers) do
-		if k:match("^in") then
-			local input = js.global.document:createElement "input"
-			input:setAttribute("type", "text")
-			input:setAttribute("placeholder", k)
+		local input = js.global.document:createElement "input"
+		input:setAttribute("type", "text")
+		input:setAttribute("placeholder", k)
 
-			input.onchange = function()
-				local wrap = coroutine.wrap(function()
-					self.simulator:setNumber(k, tonumber(input.value))
-				end)
-				stepSimulation(wrap)
-			end
-
-			self.simulationInputs:appendChild(input)
-
+		input.onchange = function()
+			local wrap = coroutine.wrap(function()
+				self.simulator:setNumber(k, tonumber(input.value))
+			end)
+			stepSimulation(wrap)
 		end
+
+		self.simulationInputs:appendChild(input)
+
 	end
 end
 
