@@ -30,7 +30,6 @@ local function registers()
 			sim:setPin(reg, "low")
 
 			data[reg] = d
-			print("Reg", reg, "wrote", d)
 		end
 
 		for i,reg in ipairs(registers) do
@@ -41,7 +40,9 @@ local function registers()
 			sim:setPin("reg_read", "low")
 			sim:setPin(reg, "low")
 
-			print("Reg", reg, "read", d, d ~= data[reg] and "wrong" or "")
+			if d ~= data[reg] then
+				print("Reg", reg, "read", d, "wrote", data[reg])
+			end
 		end
 
 	end
