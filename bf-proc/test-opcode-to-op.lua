@@ -26,11 +26,11 @@ local function op()
 			local out = sim:readValue("op_" .. op2)
 
 			if op == op2 and out ~= "high" then
-				print("In:", op, ",", op2, "not high")
+				print("In:", op, "but", op2, "not high")
 			end
 
 			if op ~= op2 and out == "high" then
-				print("In:", op, ",", op2, "high")
+				print("In:", op, "but", op2, "high")
 			end
 		end
 	end
