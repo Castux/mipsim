@@ -56,10 +56,10 @@ function BFHost:tick()
 
 	self.sim:setNumber("port_data", nil)
 
-	if sel_prog or sel_mem then
-		local array = sel_prog and self.program or self.memory
+	if sel_prog == "high" or sel_mem == "high" then
+		local array = sel_prog == "high" and self.program or self.memory
 
-		if write then
+		if write == "high" then
 			local value = self.sim:readNumber("port_data")
 			array[addr] = value
 		else
@@ -67,9 +67,9 @@ function BFHost:tick()
 			self.sim:setNumber("port_data", value)
 		end
 
-	elseif sel_io then
+	elseif sel_io == "high" then
 
-		if write then
+		if write  == "high" then
 			local value = self.sim:readNumber("port_data")
 			self.output_cb(string.char(value))
 		else

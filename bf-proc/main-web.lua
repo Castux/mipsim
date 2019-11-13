@@ -12,14 +12,6 @@ local autorunCheckbox
 
 local defaultProgram = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
 
-local function tick(host)
-	host:tick()
-
-	if autorunCheckbox.checked then
-		js.global:requestAnimationFrame(function() tick(host) end)
-	end
-end
-
 local function updateState(host)
 
 	local prog = {}
@@ -38,6 +30,15 @@ local function updateState(host)
 	end
 
 	memoryState.innerHTML = table.concat(mem)
+end
+
+local function tick(host)
+	host:tick()
+	updateState(host)
+
+	if autorunCheckbox.checked then
+		js.global:requestAnimationFrame(function() tick(host) end)
+	end
 end
 
 local function setupDOM(host)
