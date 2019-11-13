@@ -2,4 +2,15 @@
 {
 	right: initial;
 	left: 20px;
+	width: 340px;
+}
+
+#saveBox
+{
+	display: none !important;
+}
+
+#memoryState
+{
+	font-size: 0.75em;
 }

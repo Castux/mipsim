@@ -9,11 +9,15 @@ local Canvas = require "Canvas"
 local programState
 local memoryState
 
-local function setupDOM()
+local function setupDOM(host)
 
 	programState = js.global.document:getElementById "programState"
 	memoryState = js.global.document:getElementById "memoryState"
 
+	local tickButton = js.global.document:getElementById "tickButton"
+	tickButton.onclick = function()
+		host:tick()
+	end
 end
 
 local function updateState(host)
@@ -25,27 +29,30 @@ local function updateState(host)
 
 	programState.innerHTML = table.concat(prog)
 
+	local mem = {}
+	for i = 0,#host.memory do
+		table.insert(mem, string.format("%03d ", host.memory[i]))
+		if i % 16 == 15 then
+			table.insert(mem, "</br>")
+		end
+	end
+
+	memoryState.innerHTML = table.concat(mem)
 end
 
-local function onTilesLoaded(text, host)
+local function onTilesLoaded(text, host, canvas)
 
 	host.geom:loadTiles(text)
+	canvas:toggleEdit()
 
 	print("Running")
 
 	host.sim:setup()
 	host:reset_proc()
 
-	do return end
-	while true do
-		host:tick()
-	end
-
 end
 
 local function main(args)
-
-	setupDOM()
 
 	print("Loading simulator")
 
@@ -56,14 +63,14 @@ local function main(args)
 	local canvas = Canvas("canvas", geom, sim)
 
 	host:load_program("><><>++-+-+..")
-
+	setupDOM(host)
 	updateState(host)
 
 	-- Load tiles
 
 	local req = js.new(js.global.XMLHttpRequest)
 	req:open('GET', "./full-bf-proc.txt")
-	req.onload = function() onTilesLoaded(req.responseText, host) end
+	req.onload = function() onTilesLoaded(req.responseText, host, canvas) end
 	req:send()
 
 end
