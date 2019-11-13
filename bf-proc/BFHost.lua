@@ -26,10 +26,7 @@ function BFHost:init(tiles, input_cb, output_cb)
 	self.sim = Simulator(self.geom)
 	self.sim:setup()
 
-	self.sim:setPin("clock", "low")
-
-	self.sim:setPin("reset", "high")
-	self.sim:setPin("reset", "low")
+	self:reset_proc()
 end
 
 function BFHost:load_program(str)
@@ -41,6 +38,13 @@ function BFHost:load_program(str)
 	end
 
 	print(str)
+end
+
+function BFHost:reset_proc()
+	self.sim:setPin("clock", "low")
+
+	self.sim:setPin("reset", "high")
+	self.sim:setPin("reset", "low")
 end
 
 function BFHost:tick()
