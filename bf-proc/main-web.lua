@@ -10,23 +10,14 @@ local programState
 local memoryState
 local autorunCheckbox
 
+local defaultProgram = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
+
 local function tick(host)
 	host:tick()
 
 	if autorunCheckbox.checked then
 		js.global:requestAnimationFrame(function() tick(host) end)
 	end
-end
-
-local function setupDOM(host)
-
-	programState = js.global.document:getElementById "programState"
-	memoryState = js.global.document:getElementById "memoryState"
-
-	local tickButton = js.global.document:getElementById "tickButton"
-	tickButton.onclick = function() tick(host) end
-
-	autorunCheckbox = js.global.document:getElementById "autorunCheckbox"
 end
 
 local function updateState(host)
@@ -49,29 +40,41 @@ local function updateState(host)
 	memoryState.innerHTML = table.concat(mem)
 end
 
+local function setupDOM(host)
+
+	programState = js.global.document:getElementById "programState"
+	memoryState = js.global.document:getElementById "memoryState"
+
+	programState.onchange = function()
+		host:load_program(programState.value)
+		updateState(host)
+	end
+
+	local tickButton = js.global.document:getElementById "tickButton"
+	tickButton.onclick = function() tick(host) end
+
+	autorunCheckbox = js.global.document:getElementById "autorunCheckbox"
+end
+
 local function onTilesLoaded(text, host, canvas)
 
 	host.geom:loadTiles(text)
 	canvas:toggleEdit()
 
-	print("Running")
-
 	host.sim:setup()
 	host:reset_proc()
-
 end
 
 local function main(args)
-
-	print("Loading simulator")
 
 	local geom = Geom()
 	local sim = Simulator(geom)
 	local host = BFHost(function() end, function() end, geom, sim)
 
+	host:load_program(defaultProgram)
+
 	local canvas = Canvas("canvas", geom, sim)
 
-	host:load_program("><><>++-+-+..")
 	setupDOM(host)
 	updateState(host)
 
