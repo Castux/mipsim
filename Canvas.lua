@@ -460,7 +460,10 @@ end
 
 function Canvas:loadTiles(str)
 	self.geom:loadTiles(str)
+	self:zoomToAll()
+end
 
+function Canvas:zoomToAll()
 	local minx, miny = math.maxinteger, math.maxinteger
 	local maxx, maxy = math.mininteger, math.mininteger
 	for x,y,t in self.geom:iterTiles() do
@@ -478,7 +481,6 @@ function Canvas:loadTiles(str)
 
 	self.svg:setAttribute("viewBox", box)
 end
-
 
 function Canvas:editCut(copy)
 

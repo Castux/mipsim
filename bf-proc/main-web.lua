@@ -61,6 +61,7 @@ local function onTilesLoaded(text, host, canvas)
 
 	host.geom:loadTiles(text)
 	canvas:toggleEdit()
+	canvas:zoomToAll()
 
 	host.sim:setup()
 	host:reset_proc()
