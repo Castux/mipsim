@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>BF MiPSim</title>
+		<link rel="stylesheet" href="../style.css">
+		<link rel="stylesheet" href="./style.css">
+		<script src="../fengari-web.js" type="text/javascript"></script>
+		<script src="./main-web.lua" type="application/lua" async></script>
+	</head>
+	<body>
+		<div id="canvasContainer">
+			<svg id="canvas" viewBox="-200 -150 400 300">
+				<circle id="center-dot" r="5" cx="0" cy="0" />
+				<g id="componentsLayer" />
+				<g id="transistorsLayer" />
+				<g id="bridgesLayer" />
+			</svg>
+		</div>
+		<div id="saveBox" class="sideBox">
+			<h1>Editing</h1>
+			<p>w: wire, p: power, g: ground, t:transistor, b: bridge, B: remove bridge, backspace: delete, x: cut, c: copy, v: paste, m/M: mirror, r: rotate, e: toggle edit/simulate, E: simulate slowly</p>
+			<p id="labelP">Label: <input id="labelInput" type="text"></input></p>
+			<p>Save:<p>
+			<input id="savePath" type="text" placeholder="test.txt" value="test.txt"></input>
+			<button id="saveButton">Save</button>
+			<p>Load:<p>
+			<input type="file" id="loadButton" />
+			<p>Load to clipboard:<p>
+			<input type="file" id="loadToClipboardButton" />
+		</div>
+		<div id="simulationBox" class="sideBox">
+			<h1>Simulating</h1>
+			<p>Left/right click: pin high/low/unpin</p>
+			<h2>Inputs</h2>
+			<div id="simulationInputs"></div>
+			<h2>Values</h2>
+			<p id="simulationValues"></p>
+		</div>
+		<div id="bfState" class="sideBox">
+			<h1>BF state</h1>
+			<p>Program:</p>
+			<p id="programState"></p>
+			<p>Memory:</p>
+			<p id="memoryState"></p>
+		</div>
+	</body>
+
+</html>
