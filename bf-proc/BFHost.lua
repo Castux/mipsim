@@ -6,10 +6,12 @@ local Simulator = require "Simulator"
 
 local BFHost = class()
 
-function BFHost:init()
+function BFHost:init(tiles, input_cb, output_cb)
+
+	self.input_cb = input_cb
+	self.output_cb = output_cb
 
 	self.geom = Geom()
-	local tiles = io.open("full-bf-proc.txt", "r"):read("a")
 
 	self.program = {}
 	self.memory = {}
@@ -75,9 +77,9 @@ function BFHost:tick()
 
 		if write then
 			local value = self.sim:readNumber("port_data")
-			io.write(string.char(value))
+			self.output_cb(string.char(value))
 		else
-			local char = io.read(1)
+			local char = self.input_cb()
 			self.sim:setNumber("port_data", char:byte(1))
 		end
 	end
