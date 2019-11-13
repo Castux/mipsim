@@ -8,6 +8,15 @@ local Canvas = require "Canvas"
 
 local programState
 local memoryState
+local autorunCheckbox
+
+local function tick(host)
+	host:tick()
+
+	if autorunCheckbox.checked then
+		js.global:requestAnimationFrame(function() tick(host) end)
+	end
+end
 
 local function setupDOM(host)
 
@@ -15,9 +24,9 @@ local function setupDOM(host)
 	memoryState = js.global.document:getElementById "memoryState"
 
 	local tickButton = js.global.document:getElementById "tickButton"
-	tickButton.onclick = function()
-		host:tick()
-	end
+	tickButton.onclick = function() tick(host) end
+
+	autorunCheckbox = js.global.document:getElementById "autorunCheckbox"
 end
 
 local function updateState(host)
