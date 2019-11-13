@@ -9,7 +9,7 @@ local tileSize = 10
 local svgNS = "http://www.w3.org/2000/svg"
 local Canvas = class()
 
-function Canvas:init(id)
+function Canvas:init(id, geom, sim)
 
 	self.svg = js.global.document:getElementById(id)
 	self.svg.onmousemove = function(target, ev)
@@ -31,7 +31,8 @@ function Canvas:init(id)
 		self:zoom(e.deltaY > 0 and scrollSpeed or 1/scrollSpeed)
 	end
 
-	self.geom = Geom()
+	self.geom = geom
+	self.simulator = sim
 	self.svgComponents = {}
 
 	self.geom.componentUpdatedCB = function(comp)
@@ -650,7 +651,6 @@ end
 
 function Canvas:startSimulation(stepped)
 
-	self.simulator = Simulator(self.geom)
 	self.simulator.stepped = stepped
 
 	self.simulator.valueChangedCB = function(comp, value)
@@ -670,8 +670,6 @@ function Canvas:stopSimulation()
 	for comp,svg in pairs(self.svgComponents) do
 		self:resetValue(comp)
 	end
-
-	self.simulator = nil
 end
 
 
