@@ -1,17 +1,14 @@
 package.path = package.path .. ";../?.lua"
-
 local class = require "class"
-local Geom = require "Geom"
-local Simulator = require "Simulator"
 
 local BFHost = class()
 
-function BFHost:init(tiles, input_cb, output_cb)
+function BFHost:init(input_cb, output_cb, geom, sim)
 
 	self.input_cb = input_cb
 	self.output_cb = output_cb
 
-	self.geom = Geom()
+	self.geom = geom
 
 	self.program = {}
 	self.memory = {}
@@ -21,12 +18,7 @@ function BFHost:init(tiles, input_cb, output_cb)
 		self.memory[i] = 0
 	end
 
-	self.geom:loadTiles(tiles)
-
-	self.sim = Simulator(self.geom)
-	self.sim:setup()
-
-	self:reset_proc()
+	self.sim = sim
 end
 
 function BFHost:load_program(str)
