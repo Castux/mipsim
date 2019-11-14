@@ -47,7 +47,7 @@ function Canvas:init(id, geom, sim)
 	local saveButton = js.global.document:getElementById "saveButton"
 	saveButton.onclick = function()
 		local path = savePath.value
-		js.global:saveFile(self.geom:dumpTiles(), path)
+		js.global:saveFile(self.geom:dumpComponents(), path)
 	end
 
 	self.saveBox = js.global.document:getElementById "saveBox"
@@ -98,7 +98,8 @@ function Canvas:loadFile(file, toClipboard)
 		if toClipboard then
 			self:loadToClipboard(reader.result)
 		else
-			self:loadTiles(reader.result)
+			self.geom:loadComponents(reader.result)
+			self:zoomToAll()
 		end
 	end
 
@@ -442,11 +443,6 @@ function Canvas:toggleEdit(steps)
 	else
 		self:stopSimulation()
 	end
-end
-
-function Canvas:loadTiles(str)
-	self.geom:loadTiles(str)
-	self:zoomToAll()
 end
 
 function Canvas:zoomToAll()
