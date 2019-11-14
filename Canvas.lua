@@ -600,8 +600,6 @@ function Canvas:onValueChanged(comp, value)
 	if self.simulator.pins[comp] then
 		svg.classList:add "pinned"
 	end
-
-	self:updateSimulationBox()
 end
 
 local function stepSimulation(wrap)
@@ -628,6 +626,7 @@ function Canvas:setPin(comp, val)
 
 	local wrap = coroutine.wrap(function()
 		self.simulator:setPin(comp, val)
+		self:updateSimulationBox()
 	end)
 
 	stepSimulation(wrap)
