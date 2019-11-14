@@ -2,7 +2,6 @@ local class = require "class"
 local js = require "js"
 local Geom = require "Geom"
 local Simulator = require "Simulator"
-local polygonize = require "polygonize"
 
 local scrollSpeed = 1.03
 local tileSize = 10
@@ -313,7 +312,7 @@ function Canvas:onComponentUpdated(comp)
 
 	-- Polygon!
 
-	local poly = polygonize(comp)
+	local poly = comp.polygon
 	local str = {}
 
 	for _, path in ipairs(poly) do

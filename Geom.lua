@@ -1,4 +1,5 @@
 local class = require "class"
+local polygonize = require "polygonize"
 
 local Geom = class()
 
@@ -147,10 +148,26 @@ function Geom:dumpTiles()
 	return "{" .. table.concat(res, ",\n") .. "}"
 end
 
+local function dumpPolygon(p)
+
+	local res = {}
+
+	for _,path in ipairs(p) do
+		local pres = {}
+		for _,point in ipairs(path) do
+			table.insert(pres, string.format("{%d,%d}", point[1], point[2]))
+		end
+		table.insert(res, "{" .. table.concat(pres, ",") .. "}")
+	end
+
+	return "{" .. table.concat(res, ",") .. "}"
+end
+
 local function dumpComponent(comp)
 	local parts = {}
 
 	table.insert(parts, string.format("type=%q", comp.type))
+	table.insert(parts, string.format("polygon=%s", dumpPolygon(comp.polygon)))
 
 	for _,tile in ipairs(comp) do
 		table.insert(parts, dumpTile(tile, true))
@@ -233,6 +250,8 @@ function Geom:loadComponents(comps)
 			end
 		end
 
+		comp.polygon = comp.polygon or polygonize(comp)
+
 		self.components[comp] = true
 		self.dirtyComponents[comp] = true
 	end
@@ -311,6 +330,7 @@ function Geom:computeComponent(tile, bridge)
 	comp = tmp
 
 	comp.type = bridge and "bridge" or tile.type
+	comp.polygon = polygonize(comp)
 
 	return comp
 end
