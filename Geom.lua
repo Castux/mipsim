@@ -116,26 +116,30 @@ function Geom:iterTiles(bridges)
 	end)
 end
 
+local function dumpTile(tile)
+	local parts = {}
+	table.insert(parts, string.format("x=%d,y=%d", tile.x, tile.y))
+
+	if tile.type then
+		table.insert(parts, string.format("type=%q", tile.type))
+	end
+
+	if tile.bridge then
+		table.insert(parts, "bridge=true")
+	end
+
+	if tile.label then
+		table.insert(parts, string.format("label=%q", tile.label))
+	end
+
+	return "{" .. table.concat(parts, ",") .. "}"
+end
+
 function Geom:dumpTiles()
 	local res = {}
 
 	for x,y,tile in self:iterTiles() do
-		local parts = {}
-		table.insert(parts, string.format("x=%d,y=%d", x, y))
-
-		if tile.type then
-			table.insert(parts, string.format("type=%q", tile.type))
-		end
-
-		if tile.bridge then
-			table.insert(parts, "bridge=true")
-		end
-
-		if tile.label then
-			table.insert(parts, string.format("label=%q", tile.label))
-		end
-
-		table.insert(res, "{" .. table.concat(parts, ",") .. "}")
+		table.insert(res, dumpTile(tile))
 	end
 
 	return "{" .. table.concat(res, ",\n") .. "}"
@@ -166,6 +170,12 @@ function Geom:loadTiles(tiles)
 	end
 
 	self:updateComponents()
+end
+
+function Geom:dumpComponents()
+
+
+
 end
 
 function Geom:neighbours(tile)
