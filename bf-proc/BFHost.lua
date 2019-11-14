@@ -35,6 +35,8 @@ function BFHost:reset_proc()
 
 	self.sim:setPin("reset", "high")
 	self.sim:setPin("reset", "low")
+
+	self:handleIO()
 end
 
 function BFHost:tick()
@@ -44,6 +46,11 @@ function BFHost:tick()
 	local clock = self.sim:readValue("clock")
 	clock = clock == "high" and "low" or "high"
 	self.sim:setPin("clock", clock)
+
+	self:handleIO()
+end
+
+function BFHost:handleIO()
 
 	-- Handle IO port
 
