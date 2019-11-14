@@ -145,25 +145,24 @@ function Geom:loadTiles(tiles)
 
 	self:clearTiles()
 
-	if type(tiles) == "string" then
-		local loader = load("return " .. tiles)
-		if not loader then
-			print "Invalid tile dump"
-		end
-		tiles = loader()
+	local loader = load("return " .. tiles)
+	if not loader then
+		print "Invalid tile dump"
 	end
+	tiles = loader()
+
+	-- Since we cleared the tiles, we can just add them all
+	-- at the same time, and mark them all dirty
+	-- (setTile is rather slow)
 
 	for _,t in ipairs(tiles) do
-		if t.type then
-			self:setTile(t.x, t.y, t.type)
+
+		if not self.tiles[t.x] then
+			self.tiles[t.x] = {}
 		end
-		if t.bridge then
-			self:setTile(t.x, t.y, "bridge")
-		end
-		if t.label then
-			local created = self:getTile(t.x, t.y)
-			self:setLabel(created, t.label)
-		end
+
+		self.tiles[t.x][t.y] = t
+		self.dirtyTiles[t] = true
 	end
 
 	self:updateComponents()
