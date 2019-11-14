@@ -116,16 +116,18 @@ function Geom:iterTiles(bridges)
 	end)
 end
 
-local function dumpTile(tile)
+local function dumpTile(tile, noType)
 	local parts = {}
 	table.insert(parts, string.format("x=%d,y=%d", tile.x, tile.y))
 
-	if tile.type then
-		table.insert(parts, string.format("type=%q", tile.type))
-	end
+	if not noType then
+		if tile.type then
+			table.insert(parts, string.format("type=%q", tile.type))
+		end
 
-	if tile.bridge then
-		table.insert(parts, "bridge=true")
+		if tile.bridge then
+			table.insert(parts, "bridge=true")
+		end
 	end
 
 	if tile.label then
@@ -140,6 +142,29 @@ function Geom:dumpTiles()
 
 	for x,y,tile in self:iterTiles() do
 		table.insert(res, dumpTile(tile))
+	end
+
+	return "{" .. table.concat(res, ",\n") .. "}"
+end
+
+local function dumpComponent(comp)
+	local parts = {}
+
+	table.insert(parts, string.format("type=%q", comp.type))
+
+	for _,tile in ipairs(comp) do
+		table.insert(parts, dumpTile(tile, true))
+	end
+
+	return "{" .. table.concat(parts, ",") .. "}"
+end
+
+function Geom:dumpComponents()
+
+	local res = {}
+
+	for comp in pairs(self.components) do
+		table.insert(res, dumpComponent(comp))
 	end
 
 	return "{" .. table.concat(res, ",\n") .. "}"
@@ -172,11 +197,49 @@ function Geom:loadTiles(tiles)
 	self:updateComponents()
 end
 
-function Geom:dumpComponents()
+function Geom:loadComponents(comps)
 
+	self:clearTiles()
 
+	local loader = load("return " .. comps)
+	if not loader then
+		print "Invalid tile dump"
+	end
+	comps = loader()
 
+	-- Create/update tiles components
+
+	for _,comp in ipairs(comps) do
+		for i,t in ipairs(comp) do
+
+			local tile = self:getTile(t.x, t.y)
+			if tile then
+				comp[i] = tile
+			else
+				if not self.tiles[t.x] then
+					self.tiles[t.x] = {}
+				end
+
+				self.tiles[t.x][t.y] = t
+				tile = t
+			end
+
+			if comp.type == "bridge" then
+				tile.bridgeComponent = comp
+				tile.bridge = true
+			else
+				tile.component = comp
+				tile.type = comp.type
+			end
+		end
+
+		self.components[comp] = true
+		self.dirtyComponents[comp] = true
+	end
+
+	self:updateComponents()
 end
+
 
 function Geom:neighbours(tile)
 	local x,y = tile.x, tile.y
