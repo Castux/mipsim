@@ -97,7 +97,7 @@ function Canvas:loadFile(file, toClipboard)
 		if toClipboard then
 			self:loadToClipboard(reader.result)
 		else
-			self.geom:loadComponents(reader.result)
+			self.geom:load(reader.result)
 			self:zoomToAll()
 		end
 	end
@@ -506,14 +506,15 @@ function Canvas:loadToClipboard(str)
 
 	local clipboard = {}
 
-	local tiles = loader()
-	for i,tile in ipairs(tiles) do
+	local dump = loader()
+	for _,comp in ipairs(dump) do
+		for i,tile in ipairs(comp) do
 
-		if tile.type then
-			table.insert(clipboard, {tile.x, tile.y, tile.type, tile.label})
-		end
-		if tile.bridge then
-			table.insert(clipboard, {tile.x, tile.y, "bridge"})
+			if comp.type ~= "bridge" then
+				table.insert(clipboard, {tile.x, tile.y, comp.type, tile.label})
+			else
+				table.insert(clipboard, {tile.x, tile.y, "bridge"})
+			end
 		end
 	end
 	self.clipboard = clipboard
