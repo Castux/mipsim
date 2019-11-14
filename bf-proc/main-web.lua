@@ -1,10 +1,15 @@
-package.path = package.path .. ";../?.lua"
 
 local js = require "js"
+
+package.path = "../?.lua"
+
 local Geom = require "Geom"
 local Simulator = require "Simulator"
-local BFHost = require "BFHost"
 local Canvas = require "Canvas"
+
+package.path = "./?.lua"
+
+local BFHost = require "BFHost"
 
 local programState
 local memoryState

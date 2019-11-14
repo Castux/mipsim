@@ -1,3 +1,5 @@
+package.path = "./?.lua"
+
 local js = require "js"
 local Canvas = require "Canvas"
 local Geom = require "Geom"
