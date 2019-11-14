@@ -46,7 +46,7 @@ local function tick(host)
 	end
 end
 
-local function setupDOM(host)
+local function setupDOM(host, canvas)
 
 	programState = js.global.document:getElementById "programState"
 	memoryState = js.global.document:getElementById "memoryState"
@@ -57,7 +57,10 @@ local function setupDOM(host)
 	end
 
 	local tickButton = js.global.document:getElementById "tickButton"
-	tickButton.onclick = function() tick(host) end
+	tickButton.onclick = function()
+		tick(host)
+		canvas:updateSimulationBox()
+	end
 
 	autorunCheckbox = js.global.document:getElementById "autorunCheckbox"
 end
@@ -82,7 +85,7 @@ local function main(args)
 
 	local canvas = Canvas("canvas", geom, sim)
 
-	setupDOM(host)
+	setupDOM(host, canvas)
 	updateState(host)
 
 	-- Load tiles
