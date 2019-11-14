@@ -47,7 +47,7 @@ function Canvas:init(id, geom, sim)
 	local saveButton = js.global.document:getElementById "saveButton"
 	saveButton.onclick = function()
 		local path = savePath.value
-		self:downloadFile(path, self.geom:dumpTiles())
+		js.global:saveFile(self.geom:dumpTiles(), path)
 	end
 
 	self.saveBox = js.global.document:getElementById "saveBox"
@@ -84,20 +84,6 @@ function Canvas:init(id, geom, sim)
 	self.labelInput.onchange = function(t,e)
 		self:editLabel(self.labelInput.value)
 	end
-end
-
-function Canvas:downloadFile(path, content)
-
-	local element = js.global.document:createElement "a"
-	element:setAttribute('href', 'data:text/plain;charset=utf-8,' .. js.global:encodeURIComponent(content))
-	element:setAttribute('download', path);
-
-	element.style.display = 'none'
-	js.global.document.body:appendChild(element)
-
-	element:click()
-
-	js.global.document.body:removeChild(element)
 end
 
 function Canvas:loadFile(file, toClipboard)
