@@ -26,7 +26,12 @@ local function main(args)
 	host:reset_proc()
 
 	while true do
+
+		print("Tick")
 		host:tick()
+
+		print("pc", sim:readNumber("pc"))
+		print("addr", sim:readNumber("addr"))
 	end
 end
 
