@@ -9,7 +9,7 @@ local function op()
 
 	local geom = Geom()
 	local adder = io.open("part-opdec.txt"):read("a")
-	geom:loadTiles(adder)
+	geom:load(adder)
 	local sim = Simulator(geom)
 	sim:setup()
 

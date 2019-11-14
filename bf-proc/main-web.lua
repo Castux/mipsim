@@ -59,7 +59,7 @@ end
 
 local function onTilesLoaded(text, host, canvas)
 
-	host.geom:loadTiles(text)
+	host.geom:load(text)
 	canvas:toggleEdit()
 	canvas:zoomToAll()
 

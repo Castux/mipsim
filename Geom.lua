@@ -214,7 +214,7 @@ function Geom:loadTiles(tiles)
 	self:updateComponents()
 end
 
-function Geom:loadComponents(comps)
+function Geom:load(comps)
 
 	self:clearTiles()
 

@@ -9,7 +9,7 @@ local function clock()
 
 	local geom = Geom()
 	local adder = io.open("part-clock.txt"):read("a")
-	geom:loadTiles(adder)
+	geom:load(adder)
 	local sim = Simulator(geom)
 	sim:setup()
 

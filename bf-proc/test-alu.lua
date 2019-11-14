@@ -9,7 +9,7 @@ local function alu()
 
 	local geom = Geom()
 	local adder = io.open("part-alu.txt"):read("a")
-	geom:loadTiles(adder)
+	geom:load(adder)
 	local sim = Simulator(geom)
 	sim:setup()
 

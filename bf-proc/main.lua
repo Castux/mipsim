@@ -13,7 +13,7 @@ local function main(args)
 	local host = BFHost(function() return io.read(1) end, io.write, geom, sim)
 
 	local tiles = io.open("full-bf-proc.txt", "r"):read("a")
-	geom:loadTiles(tiles)
+	geom:load(tiles)
 
 	local prog_path = args[1]
 	print("Loading program " .. prog_path)
