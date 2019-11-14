@@ -1,1 +1,7 @@
-{{x=17,y=12,type="transistor"},{x=17,y=9,type="wire"},{x=17,y=10,type="wire",bridge=true},{x=17,y=11,type="wire"},{x=17,y=8,type="power"},{x=17,y=13,type="wire"},{x=17,y=14,type="wire"},{x=17,y=15,type="wire"},{x=17,y=16,type="ground"},{x=14,y=12,type="wire",bridge=true},{x=14,y=10,bridge=true},{x=14,y=11,bridge=true},{x=15,y=12,type="wire"},{x=15,y=10,bridge=true},{x=16,y=12,type="wire"},{x=16,y=10,bridge=true}}
+{{type="bridge",polygon={{{18,11},{18,10},{14,10},{14,13},{15,13},{15,11}}},{x=14,y=11},{x=14,y=12},{x=14,y=10},{x=17,y=10},{x=16,y=10},{x=15,y=10}},
+{type="transistor",polygon={{{17,12},{17,13},{18,13},{18,12}}},{x=17,y=12}},
+{type="wire",polygon={{{17,12},{18,12},{18,9},{17,9}}},{x=17,y=11},{x=17,y=10},{x=17,y=9}},
+{type="wire",polygon={{{17,12},{17,13},{14,13},{14,12}}},{x=15,y=12},{x=16,y=12},{x=14,y=12}},
+{type="ground",polygon={{{18,17},{17,17},{17,16},{18,16}}},{x=17,y=16}},
+{type="wire",polygon={{{17,13},{17,16},{18,16},{18,13}}},{x=17,y=13},{x=17,y=14},{x=17,y=15}},
+{type="power",polygon={{{17,9},{17,8},{18,8},{18,9}}},{x=17,y=8}}}
