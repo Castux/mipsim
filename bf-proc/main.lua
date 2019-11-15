@@ -10,7 +10,17 @@ local function main(args)
 
 	local geom = Geom()
 	local sim = Simulator(geom)
-	local host = BFHost(function() return io.read(1) end, io.write, geom, sim)
+	local host = BFHost(
+		function()
+			return io.read(1)
+		end,
+		function(x)
+			io.write(x)
+			io.flush()
+		end,
+		geom,
+		sim
+	)
 
 	local tiles = io.open("full-bf-proc.txt", "r"):read("a")
 	geom:load(tiles)
