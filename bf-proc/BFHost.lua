@@ -28,6 +28,10 @@ function BFHost:load_program(str)
 	for i = 1,#str do
 		self.program[i - 1] = str:byte(i)
 	end
+
+	for i = #str+1, 255 do
+		self.program[i - 1] = 0
+	end
 end
 
 function BFHost:reset_proc()
