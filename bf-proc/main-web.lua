@@ -17,6 +17,9 @@ local autorunCheckbox
 
 local defaultProgram = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
 
+local outputP
+local output = ""
+
 local function updateState(host)
 
 	local prog = {}
@@ -35,6 +38,8 @@ local function updateState(host)
 	end
 
 	memoryState.innerHTML = table.concat(mem)
+
+	outputP.innerHTML = output
 end
 
 local function tick(host)
@@ -63,6 +68,7 @@ local function setupDOM(host, canvas)
 	end
 
 	autorunCheckbox = js.global.document:getElementById "autorunCheckbox"
+	outputP = js.global.document:getElementById "output"
 end
 
 local function onTilesLoaded(text, host, canvas)
@@ -79,7 +85,10 @@ local function main(args)
 
 	local geom = Geom()
 	local sim = Simulator(geom)
-	local host = BFHost(function() end, function() end, geom, sim)
+	local host = BFHost(
+		function() return "a" end,
+		function(x) output = output .. x end,
+		geom, sim)
 
 	host:load_program(defaultProgram)
 
