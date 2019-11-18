@@ -88,8 +88,9 @@ The editor runs in browser and allows you to load, edit, and save circuits/patte
 - r: rotate
 - e: toggle edit/simulate
 - E: simulate slowly
+- scroll wheel: zoom
 
-In simulation mode, left/right clicking on wires sets to "pull high" or "pull low", meaning they will ignore the normal logic rules and force their values. This simulates, for instance, input pins.
+In simulation mode, left/right clicking on wires sets to "pull high" or "pull low", meaning they will ignore the normal logic rules and force their values, possibly updating connected wires and so on. This simulates, for instance, input pins.
 
 ## Headless simulator
 
