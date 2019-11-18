@@ -722,6 +722,7 @@ function Canvas:updateSimulationBox()
 		input.onchange = function()
 			local wrap = coroutine.wrap(function()
 				self.simulator:setNumber(k, tonumber(input.value))
+				self:updateSimulationBox()
 			end)
 			stepSimulation(wrap)
 		end
