@@ -70,18 +70,28 @@ Similar concepts are used to build all common logical gates:
 
 And combining them to form higher level circuits.
 
+### Labels
+
+Wire tiles can be labeled for debug or documentation purposes. If a component contains a labeled tile, it takes that label as its name. If there are more than one, a random one is picked.
+
+To add a label in the editor, select a single wire tile and type a name in the "label" UI box.
+
+Named components are displayed in the editor while simulating. Furthermore, labels that follow a `name_0`, `name_1`, `name_2`, etc. convention are decoded as binary numbers that can be read and inputed directly as such in the simulation UI.
+
+Named wires and number wires can also be read, set and reset programmatically when running the headless simulation.
+
 ## Editor
 
-The editor runs in browser and allows you to load, edit, and save circuits/patterns. Keystrokes:
+The editor runs in browser and allows you to load, edit, and save circuits/patterns. Click-dragging makes a selection rectangle, that the following keystrokes edit:
 
-- w: wire
-- p: power
-- g: ground
-- t: transistor
-- b: bridge
+- w: set wire
+- p: set power
+- g: set ground
+- t: set transistor
+- b: set bridge
 - B: remove bridge
-- backspace: delete
-- x: cut
+- backspace: delete non-bridge tiles
+- x: cut (normal tiles, bridges and labels)
 - c: copy
 - v: paste
 - m/M: mirror
@@ -89,6 +99,8 @@ The editor runs in browser and allows you to load, edit, and save circuits/patte
 - e: toggle edit/simulate
 - E: simulate slowly
 - scroll wheel: zoom
+
+"Save", "Load" and "Load to clipboard" buttons allow you to save and restore your work.
 
 In simulation mode, left/right clicking on wires sets to "pull high" or "pull low", meaning they will ignore the normal logic rules and force their values, possibly updating connected wires and so on. This simulates, for instance, input pins.
 
