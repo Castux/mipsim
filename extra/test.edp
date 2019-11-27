@@ -1,0 +1,122 @@
+border Bot1(t=0, 0.5){x=t; y=0; label=5;}
+border Bot2(t=0.5, 1){x=t; y=0; label=1;}
+
+border Right(t=0,1){x = 1; y = t; label=2;}
+border Left(t=1,0){x = 0; y = t; label=2;}
+
+border Top1(t=1, 0.5){x=t; y=1; label=1;}
+border Top2(t=0.5, 0){x=t; y=1; label=6;}
+
+mesh Th = buildmesh(Bot1(20) + Bot2(20) + Right(40) + Top1(20) + Top2(20) + Left(40));
+
+fespace Vh(Th, P1);
+
+/*
+Vh ux, uy, v1, v2;
+
+// Define the PDE
+solve Problem([ux, uy], [v1, v2])
+	= int2d(Th)(
+		( dx(ux) + dy(uy) ) * v1 +
+		( dx(uy) - dy(ux) ) * v2
+	)
+	- int2d(Th)(
+		0 * v1 +
+		0 * v2
+	)
+	+ on(5, uy = 1)
+	+ on(1, uy = 0)
+	+ on(2, ux = 0)
+	;
+
+plot([ux,uy]);
+*/
+/*
+Vh e, v;
+
+solve Problem2(e, v)
+	= int2d(Th)(
+		dx(e) * dx(v) + dy(e) * dy(v)
+	)
+	- int2d(Th)(
+		0 * v
+	)
+	+ on(Bot1, e = 1)
+	//+ on(Top1, e = 0)
+	;
+
+Vh gx = dx(e);
+Vh gy = dy(e);
+
+// Plot the result
+plot(e, value=true, wait=true);
+
+*/
+/*
+Vh ux, uy, e, v1, v2, v3;
+
+func rho = 0.1 + 100 * (y > 0.25) * (y < 0.5);
+
+// Define the PDE
+solve Problem([ux, uy, e], [v1, v2, v3])
+	= int2d(Th)(
+		( dx(ux) + dy(uy) ) * v1 +
+		( dx(e) + rho*ux ) * v2 +
+		( dy(e) + rho*uy ) * v3
+	)
+	- int2d(Th)(
+		0 * v1 +
+		0 * v2 +
+		0 * v3
+	)
+	+ on(5, e = 1)
+	+ on(6, e = 0)
+	+ on(2, ux = 0)
+	+ on(1, uy = 0)
+	;
+
+Vh intensity = sqrt(ux*ux+uy*uy);
+
+//plot([ux,uy], fill=true);
+plot(e, fill=true);
+*/
+
+
+Vh e, v;
+
+
+func r = 0.1 + 100 * (abs(0.5 - y) < 0.25) * (abs(0.5 - x) < 0.25);
+
+Vh con;
+
+// Define the PDE
+problem Problem(e, v)
+	= int2d(Th)(
+		-dx(e) * ( con * dx(v) + dx(con) * v) +
+		-dy(e) * ( con * dy(v) + dy(con) * v) +
+
+		dx(e) * dx(con) * v +
+		dy(e) * dy(con) * v
+	)
+	- int2d(Th)(
+		0 * v
+	)
+	+ on(5, e = 1)
+	+ on(6, e = 0)
+	;
+
+real error = 0.01;
+
+for (int i = 0; i < 4; i++){
+		con = 1/r;
+	    Problem;
+	    Th = adaptmesh(Th, e, err=error);
+	    error = error/2;
+}
+
+Vh ix = -dx(e) * con;
+Vh iy = -dy(e) * con;
+
+plot(con, wait=true, fill=true);
+plot(e, wait=true, fill=true);
+plot([ix,iy]);
