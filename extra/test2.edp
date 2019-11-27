@@ -12,6 +12,16 @@ border TopLeft(t=2,0){x=t; y=2;}
 
 border Left(t=2,0){x=0; y=t;}
 
+border Inner1(t=3,7){x=t; y=4;}
+border Inner2(t=4,1){x=7; y=t;}
+border Inner3(t=7,3){x=t; y=1;}
+border Inner4(t=1,4){x=3; y=t;}
+
+
+border TopCut(t=4,5){x=5; y=t;}
+border BottomCut(t=0,1){x=5; y=t;}
+
+
 mesh Th = buildmesh(
 	Bottom(10) +
 	Right(10) +
@@ -20,14 +30,24 @@ mesh Th = buildmesh(
 	PathTop(10) +
 	PathLeft(10) +
 	TopLeft(10) +
-	Left(10)
+	Left(10) +
+	Inner1(10) +
+	Inner2(10) +
+	Inner3(10) +
+	Inner4(10) +
+	TopCut(10) +
+	BottomCut(10)
 );
+
+mesh OrigMesh = Th;
 
 fespace Vh(Th, P1);
 
 Vh e, v;
 
-func r = 0.1 + 100 * (abs(0.5 - y) < 0.25) * (abs(0.5 - x) < 0.25);
+func r = 0.00001 +
+	10 * (abs(0.5 - y) < 1) * (abs(5 - x) < 2) +
+	10 * (abs(4.5 - y) < 1) * (abs(5 - x) < 0.5);
 
 Vh con;
 
@@ -43,22 +63,37 @@ problem Problem(e, v)
 	- int2d(Th)(
 		0 * v
 	)
-	+ on(Left, e = 1)
+	+ on(Left, e = 100)
 	+ on(Right, e = 0)
 	;
 
 real error = 0.01;
 
-for (int i = 0; i < 5; i++){
+for (int i = 0; i < 4; i++){
 		con = 1/r;
 	    Problem;
 	    Th = adaptmesh(Th, e, err=error);
 	    error = error/2;
 }
 
+Th = adaptmesh(Th, hmax = 0.1);
+
 Vh ix = -dx(e) * con;
 Vh iy = -dy(e) * con;
 
+real curr = int1d(Th,Right)(ix);
+real topCurr = int1d(Th,TopCut)(ix);
+real bottomCurr = int1d(Th,BottomCut)(ix);
+
+cout << "Current out " << curr << endl;
+cout << "Current top " << topCurr << endl;
+cout << "Current bottom " << bottomCurr << endl;
+
+cout << "Res top " << 100/topCurr << endl;
+cout << "Res bottom " << 100/bottomCurr << endl;
+
+
+
 plot(con, wait=true, fill=true);
 plot(e, wait=true, fill=true);
-plot([ix,iy]);
+plot([ix,iy], value=true);
