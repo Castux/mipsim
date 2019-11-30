@@ -1,0 +1,64 @@
+int power = 1;
+int ground = 0;
+
+border Bottom(t=0,10){x=t; y=0;}
+border Right(t=0,9){x=10; y=t;}
+border RightOut(t=9,10){x=10; y=t;}
+border Top(t=10,0){x=t; y=10;}
+border Left(t=10,1){x=0; y=t;}
+border LeftIn(t=1,0){x=0; y=t;}
+
+
+mesh Th = buildmesh(
+	Bottom(10) +
+	Right(10) +
+	RightOut(10) +
+	Top(10) +
+	Left(10) +
+	LeftIn(10)
+);
+
+mesh OrigMesh = Th;
+
+fespace Vh(Th, P1);
+
+Vh e, v;
+
+func r = 1;
+
+Vh con;
+
+// Define the PDE
+problem Problem(e, v)
+	= int2d(Th)(
+		-dx(e) * ( con * dx(v) + dx(con) * v) +
+		-dy(e) * ( con * dy(v) + dy(con) * v) +
+
+		dx(e) * dx(con) * v +
+		dy(e) * dy(con) * v
+	)
+	- int2d(Th)(
+		0 * v
+	)
+	+ on(LeftIn, e = 100)
+	+ on(RightOut, e = 0)
+	;
+
+real error = 0.01;
+
+for (int i = 0; i < 4; i++){
+		con = 1/r;
+	    Problem;
+	    Th = adaptmesh(Th, e, err=error);
+	    error = error/2;
+}
+
+Th = adaptmesh(Th, hmax = 0.2);
+
+Vh ix = -dx(e) * con;
+Vh iy = -dy(e) * con;
+
+
+plot(con, wait=true, fill=true);
+plot(e, wait=true, fill=true);
+plot([ix,iy], value=true);
