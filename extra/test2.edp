@@ -69,10 +69,35 @@ Vh iy = -dy(e) * con;
 
 Vh i = sqrt(ix*ix + iy*iy);
 
+Vh lx = -iy/i;
+Vh ly = ix/i;
+
+Vh pot, dum, vv, ww;
+
+/*
+solve Lines(pot, vv) =
+	int2d(Th)( dx(pot) * ix * vv + dy(pot) * iy * vv )
+	- int2d(Th)( 0 * vv )
+	+ on(Bottom, pot = 0)
+	+ on(TopLeft, pot = 1)
+	+ on(PathLeft, pot = 1)
+	+ on(PathTop, pot = 1)
+	+ on(PathRight, pot = 1)
+	+ on(TopRight, pot = 1)
+	;
+*/
+
+solve Lines(pot, dum, vv, ww) =
+	int2d(Th)( dx(pot) * vv + dy(pot) * ww )
+	+ int2d(Th)( -dy(e) * con * vv + dx(e) * con * ww)
+	+ on(Bottom, pot = 0)
+;
+
 plot(con, wait=true, fill=true);
 plot(e, wait=true, fill=true);
 plot([ix,iy], wait=true);
 plot(i, value=true, fill=true);
+plot(pot, value=true);
 
 real currOut = int1d(Th,Right)(ix);
 real currIn = int1d(Th,Left)(ix);
