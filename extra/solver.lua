@@ -132,14 +132,17 @@ local function find(ops, arity, target, memo)
 end
 
 local standard = {"not", "or", "and", "nor", "nand", "xor", "nxor"}
+local limited = {"not", "or", "and"}
 local nand = {"nand"}
 
 local memo = {}
 
-for target = 0, (1 << (1 << 4)) - 1 do
+--for target = 0, (1 << (1 << 4)) - 1 do
+do
+	local target = 8
 	print("======")
 	print("FUNC", target)
-	local res = find(standard, 4, target, memo)
+	local res = find(nand, 2, target, memo)
 
 	for i,v in ipairs(res) do
 		print(table.unpack(v))
