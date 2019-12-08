@@ -54,8 +54,9 @@ local function find_at_depth(ops, arity, depth, ignore)
 		if d == 0 then
 			local func = funcs[#funcs][1]
 
-			if not ignore[func] and not results[func] then
-				results[func] = copy(funcs)
+			if not ignore[func] then
+				results[func] = results[func] or {}
+				table.insert(results[func], copy(funcs))
 			end
 			return
 		end
@@ -96,20 +97,16 @@ end
 local function build_all(ops, arity)
 
 	local found = {}
-	local count = 0
 
 	for depth = 1, math.maxinteger do
 
 		local res = find_at_depth(ops, arity, depth, found)
 		local empty = true
 
-		for func,solution in pairs(res) do
+		for func,solutions in pairs(res) do
 			empty = false
-			found[func] = solution
-			count = count + 1
+			found[func] = solutions
 		end
-
-		print(count)
 
 		if empty then
 			break
@@ -125,9 +122,110 @@ local function dirty_dump(results)
 		print("======")
 		print("FUNC", func)
 		for i,v in ipairs(res) do
-			print(table.unpack(v))
+			print("----")
+			for j,w in ipairs(v) do
+				print(table.unpack(w))
+			end
 		end
 	end
 end
 
-dirty_dump(build_all({"nand"}, 3))
+local function count_results(results)
+	for func, res in pairs(results) do
+		print(func, #res, #res[1] - 2)
+	end
+end
+
+local function build_all_by_closing(ops, arity)
+
+	local found = {}
+	local funcs = {}
+
+	for i,v in ipairs(selectors(arity)) do
+		local name = string.char(string.byte("a") + i-1)
+		local t = {v, name}
+		table.insert(funcs, t)
+		found[v] = t
+	end
+
+	local first_new_index = 1
+
+	while true do
+
+		local new = {}
+
+		for _,op in ipairs(ops) do
+			for i = 1,#funcs do
+
+				local j_start = math.max(first_new_index, i)
+
+				for j = j_start,#funcs do		-- assume all operators are symetrical
+					local left,right = funcs[i][1], funcs[j][1]
+					local res = apply(op, left, right, arity)
+
+					if not found[res] then
+						local t = {res, op, left, (op ~= "not" and right or nil)}
+						table.insert(new, t)
+						found[res] = t
+					end
+
+					if op == "not" then
+						break		-- the second argument is actually not used, no need to go through all of them
+					end
+				end
+			end
+		end
+
+		if #new == 0 then
+			break
+		end
+
+		first_new_index = #funcs + 1
+		print(first_new_index)
+
+		table.move(new, 1, #new, #funcs + 1, funcs)
+	end
+
+	return funcs, found
+end
+
+--count_results(build_all({"nand"}, 2))
+
+local function count_gates(found, func)
+
+	local used = {}
+
+	local function rec(f)
+		if used[f] then
+			return
+		end
+
+		local t = found[f]
+
+		if t[3] then
+			used[f] = true
+			rec(t[3])
+		end
+
+		if t[4] then
+			rec(t[4])
+		end
+	end
+
+	rec(func)
+
+	local count = 0
+	for k,v in pairs(used) do
+		count = count + 1
+	end
+
+	return count
+end
+
+local test, t2 = build_all_by_closing({"nand"}, 2)
+
+--table.sort(test, function(a,b) return a[1] < b[1] end)
+
+for _,v in ipairs(test) do
+	print("count", count_gates(t2, v[1]), table.unpack(v) )
+end
