@@ -15,6 +15,19 @@ local function apply(op, f, g, arity)
 	return ops[op](f,g) & mask
 end
 
+local function copy(t)
+
+	if type(t) ~= "table" then
+		return t
+	end
+
+	local c = {}
+	for k,v in pairs(t) do
+		c[k] = copy(v)
+	end
+	return c
+end
+
 local function selectors(arity)
 
 	local selectors = {}
@@ -31,7 +44,7 @@ local function selectors(arity)
 	return selectors
 end
 
-local function find_at_depth(ops, arity, depth, target)
+local function find_at_depth(ops, arity, depth, target, memo)
 
 	local funcs = {}
 	local found = false
@@ -69,6 +82,10 @@ local function find_at_depth(ops, arity, depth, target)
 					if new then
 						table.insert(funcs, {res, op, left, (op ~= "not" and right or nil)})
 
+						if memo and not memo[res] then
+							memo[res] = copy(funcs)
+						end
+
 						if res == target then
 							found = true
 							return
@@ -98,10 +115,14 @@ local function find_at_depth(ops, arity, depth, target)
 	end
 end
 
-local function find(ops, arity, target)
+local function find(ops, arity, target, memo)
+
+	if memo and memo[target] then
+		return memo[target]
+	end
 
 	for depth = 1,math.maxinteger do
-		local res = find_at_depth(ops, arity, depth, target)
+		local res = find_at_depth(ops, arity, depth, target, memo)
 		if res then
 			return res
 		end
@@ -113,10 +134,12 @@ end
 local standard = {"not", "or", "and", "nor", "nand", "xor", "nxor"}
 local nand = {"nand"}
 
-for target = 0, (1 << (1 << 3)) - 1 do
+local memo = {}
+
+for target = 0, (1 << (1 << 4)) - 1 do
 	print("======")
 	print("FUNC", target)
-	local res = find(nand, 3, target)
+	local res = find(standard, 4, target, memo)
 
 	for i,v in ipairs(res) do
 		print(table.unpack(v))
