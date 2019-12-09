@@ -9,10 +9,12 @@ local ops =
 	["nxor"] = function(a,b) return ~(a ~ b) end,
 }
 
-local function apply(op, f, g, arity)
+local function make_apply(arity)
 
 	local mask = (1 << (1 << arity)) - 1
-	return ops[op](f,g) & mask
+	return function(op, f, g)
+		return ops[op](f,g) & mask
+	end
 end
 
 local function copy(t)
@@ -44,8 +46,9 @@ local function selectors(arity)
 	return selectors
 end
 
-local function find_at_depth(ops, arity, depth, target, memo)
+local function find_at_depth(ops, arity, depth, target, memo, all_solutions)
 
+	local solutions = {}
 	local funcs = {}
 	local found = false
 
@@ -55,8 +58,11 @@ local function find_at_depth(ops, arity, depth, target, memo)
 
 		if v == target then
 			found = true
+			table.insert(solutions, copy(funcs))
 		end
 	end
+
+	local apply = make_apply(arity)
 
 	local function rec(d, min_i)
 
@@ -69,7 +75,7 @@ local function find_at_depth(ops, arity, depth, target, memo)
 			for i = min_i,#funcs do
 				for j = i,#funcs do		-- assume all operators are symetrical
 					local left,right = funcs[i][1], funcs[j][1]
-					local res = apply(op, left, right, arity)
+					local res = apply(op, left, right)
 
 					local new = true
 					for i,v in ipairs(funcs) do
@@ -88,12 +94,16 @@ local function find_at_depth(ops, arity, depth, target, memo)
 
 						if res == target then
 							found = true
-							return
+							table.insert(solutions, copy(funcs))
+
+							if not all_solutions then
+								return
+							end
 						end
 
 						rec(d-1, i)
 
-						if found then return end
+						if found and (not all_solutions) then return end
 
 						table.remove(funcs)
 					end
@@ -110,41 +120,24 @@ local function find_at_depth(ops, arity, depth, target, memo)
 		rec(depth, 1)
 	end
 
-	if found then
-		return funcs
-	end
+	return solutions
 end
 
-local function find(ops, arity, target, memo)
+local function find(ops, arity, target, memo, all_solutions)
 
 	if memo and memo[target] then
 		return memo[target]
 	end
 
 	for depth = 1,math.maxinteger do
-		local res = find_at_depth(ops, arity, depth, target, memo)
-		if res then
+		local res = find_at_depth(ops, arity, depth, target, memo, all_solutions)
+		if #res > 0 then
 			return res
 		end
 	end
-
-	return nil
 end
 
-local standard = {"not", "or", "and", "nor", "nand", "xor", "nxor"}
-local limited = {"not", "or", "and"}
-local nand = {"nand"}
-
-local memo = {}
-
---for target = 0, (1 << (1 << 4)) - 1 do
-do
-	local target = 8
-	print("======")
-	print("FUNC", target)
-	local res = find(nand, 2, target, memo)
-
-	for i,v in ipairs(res) do
-		print(table.unpack(v))
-	end
-end
+return
+{
+	find = find
+}
