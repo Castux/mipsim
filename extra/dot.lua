@@ -20,6 +20,7 @@ local function make(solution)
 	table.insert(txt, "}")
 
 	-- gates
+	local out
 
 	for _,v in ipairs(solution) do
 		if v[3] then
@@ -28,12 +29,16 @@ local function make(solution)
 				table.insert(txt, string.format("f%d -> f%d;", v[i], v[1]))
 			end
 		end
+
+		if v.out then
+			out = v[1]
+		end
 	end
 
 	-- output
 
 	table.insert(txt, ('out [shape=none, label=""];'))
-	table.insert(txt, string.format("f%d -> out;", solution[#solution][1]))
+	table.insert(txt, string.format("f%d -> out;", out))
 
 	table.insert(txt, "}")
 

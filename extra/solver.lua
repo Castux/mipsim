@@ -58,8 +58,12 @@ local function find_at_depth(ops, arity, depth, target, memo, all_solutions)
 
 		if v == target then
 			found = true
-			table.insert(solutions, copy(funcs))
+			funcs[i].out = true
 		end
+	end
+
+	if found then
+		table.insert(solutions, copy(funcs))
 	end
 
 	local apply = make_apply(arity)
@@ -94,7 +98,9 @@ local function find_at_depth(ops, arity, depth, target, memo, all_solutions)
 
 						if res == target then
 							found = true
-							table.insert(solutions, copy(funcs))
+							local c = copy(funcs)
+							c[#c].out = true
+							table.insert(solutions, c)
 
 							if not all_solutions then
 								return
