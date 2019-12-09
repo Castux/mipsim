@@ -64,7 +64,7 @@ local function find_at_depth(ops, arity, depth, target, memo, all_solutions)
 
 	local apply = make_apply(arity)
 
-	local function rec(d, min_i)
+	local function rec(d)
 
 		if d == 0 then
 			return
@@ -72,7 +72,7 @@ local function find_at_depth(ops, arity, depth, target, memo, all_solutions)
 
 		for _,op in ipairs(ops) do
 
-			for i = min_i,#funcs do
+			for i = 1,#funcs do
 				for j = i,#funcs do		-- assume all operators are symetrical
 					local left,right = funcs[i][1], funcs[j][1]
 					local res = apply(op, left, right)
@@ -101,7 +101,7 @@ local function find_at_depth(ops, arity, depth, target, memo, all_solutions)
 							end
 						end
 
-						rec(d-1, i)
+						rec(d-1)
 
 						if found and (not all_solutions) then return end
 
@@ -117,7 +117,7 @@ local function find_at_depth(ops, arity, depth, target, memo, all_solutions)
 	end
 
 	if not found then
-		rec(depth, 1)
+		rec(depth)
 	end
 
 	return solutions
