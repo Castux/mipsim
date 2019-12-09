@@ -12,10 +12,9 @@ local function make(solution)
 	table.insert(txt, "rank = same;")
 
 	for i,v in ipairs(solution) do
-		if v[3] then
-			break
+		if not v[3] then
+			table.insert(txt, string.format("f%d [shape=circle, label=%s];", v[1], v[2]))
 		end
-		table.insert(txt, string.format("f%d [shape=circle, label=%s];", v[1], v[2]))
 	end
 	table.insert(txt, "}")
 
